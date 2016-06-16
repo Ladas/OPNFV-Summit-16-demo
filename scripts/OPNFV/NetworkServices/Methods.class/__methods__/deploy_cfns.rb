@@ -52,7 +52,7 @@ def security_group_1(security_group, vpc_id)
   }  
 end  
 
-def instance(name, network_interfaces, keyname, image_id)
+def instance(name, network_interfaces, keyname, image_id,availability_zone,instance_type)
   nics = network_interfaces.each_with_index.map do |x, i| 
     {"NetworkInterfaceId" => {"Ref" => x}, "DeviceIndex" => i.to_s}
   end
@@ -61,9 +61,10 @@ def instance(name, network_interfaces, keyname, image_id)
     name =>
     {"Type"=>"AWS::EC2::Instance",
      "Properties"=> {
-       "InstanceType" => "t1.micro",
+       "InstanceType" => instance_type,
        "ImageId"=> image_id,
        "KeyName"=> keyname,
+       "AvailabilityZone"=>availability_zone,
        "NetworkInterfaces"=> nics,
        "Tags"=>[{"Key"=>"Role", "Value"=>"Test Instance"}],
        "UserData"=>
@@ -89,27 +90,65 @@ def base_template(name)
   }
 end
 
-def create_template(name)
-  vpc_id = 'vpc-a06de3c5' 
-  security_group_1 = "ControlSecurityGroup"
-  security_group_2 = "WebSecurityGroup"
-  nic1 = "ControlXface"
-  nic2 = "WebXface"
-  
+def create_template(name,nsd_properties,nsd_requirements)
+  vpc_id = nsd_properties['vpc_id'] #'vpc-303bc157' 
+  image_id = nsd_properties['image_id']
+  subnet=nil
+  security_group=nil
+  availability_zone=nsd_properties['availabilityzone']
+  key_name=nsd_properties['key_name']
+  instance_type=nsd_properties['image_type']
   template_content = base_template(name)
-  template_content["Resources"].merge!(security_group(security_group_1, vpc_id))
-  template_content["Resources"].merge!(security_group(security_group_2, vpc_id))
-  template_content["Resources"].merge!(template_interface(nic1, 'subnet-ac904787', security_group_1))
-  template_content["Resources"].merge!(template_interface(nic2, 'subnet-1852bb33', security_group_2)) 
-  template_content["Resources"].merge!(instance("Ec2Instance", [nic1, nic2], "EmsRefreshSpec-KeyPair", 'ami-5769193e'))
+  nic = Array.new 
+  
+  network=$evm.vmdb('ManageIQ_Providers_Amazon_NetworkManager_CloudNetwork').find_by_name(vpc_id.strip)
+  image=$evm.vmdb('ManageIQ_Providers_Amazon_CloudManager_Template').find_by_name(image_id.strip)
+  if network==nil || image==nil
+    $evm.log(:error,"vpc_id #{vpc_id} or image id #{image_id} for amazon is not valid.")
+     exit MIQ_ERROR
 
+  end 
+  
+  if availability_zone==nil
+    $evm.log(:error,"availabilityzone is null")
+    exit MIQ_ERROR
+  end
+
+  if  instance_type==nil
+    instance_type="t2.medium"
+  end  
+
+
+  nsd_requirements.each do|requirement|
+   requirement.each do|name,value|
+      $evm.log(:info ,"finding #{name}  and #{value}")
+      if value!=nil
+        #check if manageIQ database has the interface and get it's id
+        $evm.log(:info ,"finding #{value} subnet in amazon")
+        subnet=$evm.vmdb('ManageIQ_Providers_Amazon_NetworkManager_CloudSubnet').find_by_name(value.strip)
+        if subnet==nil
+          $evm.log(:error,"#{value} subnet not found in amazon")
+          exit MIQ_ERROR
+        end
+          nic<< value.gsub("\s", "").gsub("_", "")
+          security_group_name="DefaultSecurity"+value.gsub("\s", "").gsub("_", "")
+        template_content["Resources"].merge!(security_group(security_group_name, network.ems_ref))
+          template_content["Resources"].merge!(template_interface(value.gsub("\s", "").gsub("_", ""), subnet.ems_ref, security_group_name))
+
+      end
+    end  
+  end
+  
+  
+  
+  $evm.log(:info ,"nic array==> #{nic}")
+  template_content["Resources"].merge!(instance("Ec2Instance", nic, key_name, image.ems_ref,availability_zone,instance_type))  
   $evm.vmdb('orchestration_template_cfn').create(
     :name      => name, 
     :orderable => true, 
     :content   => JSON.pretty_generate(template_content))
 end
 
-# TODO change above code to generate a real CFN template
 
 def deploy_amazon_stack(orchestration_manager, parent_service, vnf_service)
   nsd_properties = JSON.parse(vnf_service.custom_get('properties'))
@@ -121,8 +160,7 @@ def deploy_amazon_stack(orchestration_manager, parent_service, vnf_service)
   $evm.log("info", "Listing nsd_capabilities #{nsd_capabilities}")
   
   name = "#{parent_service.name} #{vnf_service.name}"
-  # TODO generate a CFN template according to VNF properties, requirements and capabilities
-  template = create_template(name)
+  template = create_template(name,nsd_properties,nsd_requirements)
   
   $evm.log("info", "Deploying CFN template #{name}")
   orchestration_service = $evm.vmdb('ServiceOrchestration').create(
