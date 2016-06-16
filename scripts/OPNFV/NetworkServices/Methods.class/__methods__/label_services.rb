@@ -31,7 +31,7 @@ begin
     if nsd_key =~ /topology_template/
       inputs = nsd['topology_template']['node_templates']
       inputs.each do |input_key, input_value|
-        if input_key =~ /VNF\d/
+        if input_key =~ /VNF\d/ or input_value['type'] == 'tosca.nodes.nfv.VL'
           label_child_service(network_service, input_key, input_value)
         else
           set_attribute(network_service, input_key, input_value)
