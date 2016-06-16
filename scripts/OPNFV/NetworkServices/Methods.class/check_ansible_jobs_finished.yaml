@@ -1,0 +1,12 @@
+---
+object_type: instance
+version: 1.0
+object:
+  attributes:
+    display_name: 
+    name: check_ansible_jobs_finished
+    inherits: 
+    description: 
+  fields:
+  - execute:
+      value: check_ansible_jobs_finished

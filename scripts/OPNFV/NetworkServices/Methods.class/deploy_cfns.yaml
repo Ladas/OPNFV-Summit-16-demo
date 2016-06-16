@@ -1,0 +1,12 @@
+---
+object_type: instance
+version: 1.0
+object:
+  attributes:
+    display_name: 
+    name: deploy_cfns
+    inherits: 
+    description: 
+  fields:
+  - execute:
+      value: deploy_cfns

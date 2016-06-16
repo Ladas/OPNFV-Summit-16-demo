@@ -1,0 +1,20 @@
+---
+object_type: instance
+version: 1.0
+object:
+  attributes:
+    display_name: 
+    name: order_network_service
+    inherits: 
+    description: 
+  fields:
+  - post1:
+      value: "/NetworkServices/Methods/create_networks_and_subnets"
+  - post2:
+      value: "/NetworkServices/Methods/deploy_vnfs"
+  - post3:
+      value: "/NetworkServices/Methods/deploy_cfns"
+  - post4:
+      value: "/NetworkServices/Methods/check_services_provisioned"
+  - post5:
+      value: "/NetworkServices/Methods/run_ansible_jobs"

@@ -1,0 +1,18 @@
+---
+object_type: instance
+version: 1.0
+object:
+  attributes:
+    display_name: 
+    name: network_service
+    inherits: 
+    description: 
+  fields:
+  - pre4:
+      value: "/NetworkServices/Methods/parse_nsd"
+  - pre5:
+      value: "/NetworkServices/Methods/rename_service"
+  - post1:
+      value: "/NetworkServices/Methods/create_vnfs"
+  - post2:
+      value: "/NetworkServices/Methods/label_services"
