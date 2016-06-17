@@ -21,6 +21,21 @@ def get_template(orchestration_manager, network_service, parent_service, vnf_ser
   # Upload specific VNFD per VNF, defined in NSD, into Tacker
   unused_cps    = []
   virtual_links = {}
+  
+  # We normally rename network targets here (because we make them unique in create_networks_and_subnets,
+  # but we don't want to do this for flat networks, so find them (if any)
+  skip_rename_networks = []  
+  
+  network_service.direct_service_children.detect { |x| x.name == 'VNF Networks' }.direct_service_children.each do |vnf_network|
+    
+    vnf_network_properties = JSON.parse(vnf_network.custom_get('properties'))
+    network_type = vnf_network_properties['network_type']
+    
+    # Don't create flat networks
+    if network_type == 'flat'
+      skip_rename_networks << vnf_network.name
+    end
+  end
     
   template_content = JSON.parse(template_contents[vnf_service.custom_get('type')].to_json.dup)
   $evm.log("info", "Template VNFD: #{template_content}")
@@ -77,10 +92,15 @@ def get_template(orchestration_manager, network_service, parent_service, vnf_ser
         
         $evm.log("info", "#{link_type}: #{link_name} with network name #{network_name}, is being added to VNFD node_templates section")
         # And store Virtual Link that will be added later
+        
+        if !skip_rename_networks.include? network_name
+          network_name = "#{parent_service.name}_#{$evm.root['service_template_provision_task_id']}_#{network_name}"
+        end
+        
         virtual_links[link_name] = {
           'type'       => 'tosca.nodes.nfv.VL',
           'properties' => {
-            'network_name' => "#{parent_service.name}_#{$evm.root['service_template_provision_task_id']}_#{network_name}",
+            'network_name' => network_name,
             'vendor'       => 'Tacker'}}
       end  
     end

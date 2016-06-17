@@ -11,6 +11,16 @@ def get_networks_template(network_service, parent_service)
     
     vnf_network_properties = JSON.parse(vnf_network.custom_get('properties'))
     cidr = vnf_network_properties['cidr']
+    network_type = nil
+    
+    if vnf_network_properties.include? 'network_type'
+      network_type = vnf_network_properties['network_type']
+    end
+    
+    # Don't create flat networks
+    if network_type != nil and network_type == 'flat'
+      next
+    end
     
     network_name = "#{parent_service.name}_#{vnf_network.name}_net"
     
