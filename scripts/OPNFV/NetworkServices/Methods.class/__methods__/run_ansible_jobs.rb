@@ -23,7 +23,7 @@ begin
   parent_service = $evm.root['service_template_provision_task'].destination
   parent_service.name = $evm.root.attributes['dialog_service_name']
   
-  template_name         = 'HelloOS'
+  template_name         = 'OPNFV-demo-test'
   ansible_manager_name  = 'ansible Configuration Manager'
   
   network_service       = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
