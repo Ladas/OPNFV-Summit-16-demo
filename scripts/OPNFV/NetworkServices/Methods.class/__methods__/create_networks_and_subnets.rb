@@ -16,14 +16,14 @@ def get_networks_template(network_service, parent_service)
     
     template_content['resources'][network_name] = {}
     template_content['resources'][network_name]['properties'] = {}
-    template_content['resources'][network_name]['properties']['name'] = "#{vnf_network.name}"
+    template_content['resources'][network_name]['properties']['name'] = "#{parent_service.name}_#{$evm.root['service_template_provision_task_id']}_#{vnf_network.name}"
     template_content['resources'][network_name]['type'] = 'OS::Neutron::Net'
     
     subnet_name = "#{parent_service.name}_#{vnf_network.name}_subnet"
     
     template_content['resources'][subnet_name] = {}
     template_content['resources'][subnet_name]['properties'] = {}
-    template_content['resources'][subnet_name]['properties']['name'] = "#{vnf_network.name}_subnet"
+    template_content['resources'][subnet_name]['properties']['name'] = "#{parent_service.name}_#{$evm.root['service_template_provision_task_id']}_#{vnf_network.name}_subnet"
     template_content['resources'][subnet_name]['properties']['cidr'] = cidr
     template_content['resources'][subnet_name]['properties']['network_id'] = {}
     template_content['resources'][subnet_name]['properties']['network_id']['get_resource'] = network_name
@@ -63,9 +63,8 @@ def deploy_networks_stack(orchestration_manager, parent_service, template)
   orchestration_service = $evm.vmdb('ServiceOrchestration').create(
     :name => "#{parent_service.name} networks")
 
-  orchestration_service.stack_name             = "#{parent_service.name}_networks"
+  orchestration_service.stack_name             = "#{parent_service.name}_#{$evm.root['service_template_provision_task_id']}_networks"
   orchestration_service.orchestration_template = template
-  $evm.log(:info, "AJB template: #{template}")
   orchestration_service.orchestration_manager  = orchestration_manager
   orchestration_service.stack_options          = {:attributes => {}}
   orchestration_service.display                = true

@@ -80,7 +80,7 @@ def get_template(orchestration_manager, network_service, parent_service, vnf_ser
         virtual_links[link_name] = {
           'type'       => 'tosca.nodes.nfv.VL',
           'properties' => {
-            'network_name' => network_name,
+            'network_name' => "#{parent_service.name}_#{$evm.root['service_template_provision_task_id']}_#{network_name}",
             'vendor'       => 'Tacker'}}
       end  
     end
