@@ -42,12 +42,19 @@ end
 def deploy_networks(network_service, parent_service)
   
   network_orchestration_manager = $evm.vmdb('ManageIQ_Providers_Openstack_CloudManager').find_by_name("openstack-nfvpe")
-  networks_template = get_networks_template(network_service, parent_service)
-  networks_orchestration = deploy_networks_stack(network_orchestration_manager, parent_service, networks_template)
   
-  while networks_orchestration.orchestration_stack_status[0] == 'transient'
+  networks_orchestration = $evm.vmdb('ServiceOrchestration').find_by_name("#{parent_service.name} networks")
+  
+  if networks_orchestration == nil
+    networks_template = get_networks_template(network_service, parent_service)
+    networks_orchestration = deploy_networks_stack(network_orchestration_manager, parent_service, networks_template)
+  end
+  
+  if networks_orchestration.orchestration_stack_status[0] == 'transient'
     $evm.log(:info, "Waiting for networks to spawn: #{networks_orchestration.orchestration_stack_status} (current state)")
-    sleep(1)
+    $evm.root['ae_result']         = 'retry'
+    $evm.root['ae_retry_interval'] = '5.seconds'
+    exit MIQ_OK
   end
 end
 
