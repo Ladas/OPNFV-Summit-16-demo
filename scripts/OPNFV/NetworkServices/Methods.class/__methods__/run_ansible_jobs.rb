@@ -23,12 +23,14 @@ begin
   parent_service = $evm.root['service_template_provision_task'].destination
   parent_service.name = $evm.root.attributes['dialog_service_name']
   
-  template_name         = 'OPNFV-demo-test'
+  template_name         = 'OPNFV-demo'
   ansible_manager_name  = 'ansible Configuration Manager'
   
   network_service       = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
   configuration_manager = $evm.vmdb('ManageIQ_Providers_AnsibleTower_ConfigurationManager').find_by_name(ansible_manager_name)
   template              = $evm.vmdb('ConfigurationScript').find_by_name(template_name)
+  
+  $evm.log("info", "Found template #{template.name}")
   
   vms = parent_service.direct_service_children.collect(&:vms).flatten
   vms                   = [vms[0], vms[1]]
