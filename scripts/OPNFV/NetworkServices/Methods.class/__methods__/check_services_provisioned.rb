@@ -28,7 +28,7 @@ def check_deployed(service)
   case status.downcase
   when 'create_complete', 'active'
     finished = true
-  when 'rollback_complete', 'delete_complete', /failed$/, /canceled$/
+  when 'rollback_complete', 'delete_complete', 'error', /failed$/, /canceled$/
     error_reason = reason
   end
 
