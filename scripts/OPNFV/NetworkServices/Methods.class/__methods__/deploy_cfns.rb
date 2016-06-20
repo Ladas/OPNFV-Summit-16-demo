@@ -157,6 +157,7 @@ def deploy_amazon_stack(orchestration_manager, parent_service, vnf_service)
   orchestration_service = $evm.vmdb('ServiceOrchestration').create(
     :name => "#{parent_service.name} #{vnf_service.name}")
 
+  orchestration_service.custom_set('properties', nsd_properties.to_json)
   orchestration_service.stack_name             = name.gsub("\s", "-").gsub("_", "-")
   orchestration_service.orchestration_template = template
   orchestration_service.orchestration_manager  = orchestration_manager

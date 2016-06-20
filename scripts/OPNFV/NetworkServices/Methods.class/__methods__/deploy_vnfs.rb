@@ -132,10 +132,12 @@ def deploy_vnf_stack(orchestration_manager, network_service, parent_service, vnf
   
   # TODO should we filter passed params based on inputs in VNFD?
   params = JSON.parse(vnf_service.custom_get('properties')).to_json
-
+  
+  
   orchestration_service = $evm.vmdb('ServiceOrchestration').create(
     :name => "#{parent_service.name} #{vnf_service.name}")
-
+  
+  orchestration_service.custom_set('properties', params)
   orchestration_service.stack_name             = "#{parent_service.name} #{vnf_service.name}"
   orchestration_service.orchestration_template = template
   orchestration_service.orchestration_manager  = orchestration_manager
