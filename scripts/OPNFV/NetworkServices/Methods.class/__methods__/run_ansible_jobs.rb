@@ -2,7 +2,12 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
   orchestration_service = $evm.vmdb('ServiceAnsibleTower').create(
     :name => "Ansible job - #{template.name}")
   
-  vm_names = vms.collect(&:name).join(",")
+  $evm.log(:info, "Running Ansible Tower template on VM of the type: #{vms.first.type}")
+  if vms.first.type == "ManageIQ::Providers::Amazon::CloudManager::Vm"
+    vm_names = vms.collect(&:ipaddresses).join(",")
+  else
+    vm_names = vms.collect(&:name).join(",")
+  end
   $evm.log(:info, "Running Ansible Tower template: #{template.name} on VMs: #{vm_names}")
   
   orchestration_service.job_template          = template
