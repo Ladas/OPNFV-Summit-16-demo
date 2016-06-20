@@ -52,7 +52,7 @@ begin
   else
     # deployment not done yet in provider
     $evm.root['ae_result']         = 'retry'
-    $evm.root['ae_retry_interval'] = '30.seconds'
+    $evm.root['ae_retry_interval'] = '60.seconds'
   end
 rescue => err
   $evm.log(:error, "[#{err}]\n#{err.backtrace.join("\n")}") 
