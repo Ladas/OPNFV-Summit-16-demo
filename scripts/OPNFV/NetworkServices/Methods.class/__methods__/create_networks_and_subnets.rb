@@ -35,6 +35,7 @@ def get_networks_template(network_service, parent_service)
     template_content['resources'][subnet_name]['properties'] = {}
     template_content['resources'][subnet_name]['properties']['name'] = "#{parent_service.name}_#{$evm.root['service_template_provision_task_id']}_#{vnf_network.name}_subnet"
     template_content['resources'][subnet_name]['properties']['cidr'] = cidr
+    template_content['resources'][subnet_name]['properties']['gateway_ip'] = ''
     template_content['resources'][subnet_name]['properties']['network_id'] = {}
     template_content['resources'][subnet_name]['properties']['network_id']['get_resource'] = network_name
     template_content['resources'][subnet_name]['type'] = 'OS::Neutron::Subnet'
