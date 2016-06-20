@@ -31,7 +31,13 @@ def check_deployed(service)
   when 'rollback_complete', 'delete_complete', 'error', /failed$/, /canceled$/
     error_reason = reason
   end
-
+  
+  # TODO(do a proper waiting loop for refresh of all providers with their network managers)
+  if !service.vms.blank? && service.vms.collect(&:ipaddresses).flatten.blank?
+    $evm.log("info", "Waiting for #{service.name} to get IPs of VMs.")
+    finished = false
+  end 
+  
   $evm.log("info", "Please examine stack resources for more details") unless error_reason.blank?
 
   $evm.set_state_var('deploy_result', $evm.root['ae_result'])
