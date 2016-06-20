@@ -1,13 +1,13 @@
-def launch_ansible_job(configuration_manager, network_service, parent_service, template, vms)
+def launch_ansible_job(configuration_manager, network_service, parent_service, template, vms, properties)
   orchestration_service = $evm.vmdb('ServiceAnsibleTower').create(
-    :name => "#{parent_service.name} ansible test")
+    :name => "Ansible job - #{template.name}")
   
   vm_names = vms.collect(&:name).join(",")
   $evm.log(:info, "Running Ansible Tower template: #{template.name} on VMs: #{vm_names}")
   
   orchestration_service.job_template          = template
   orchestration_service.configuration_manager = configuration_manager
-  orchestration_service.job_options           = {:limit => vm_names}
+  orchestration_service.job_options           = {:limit => vm_names, :extra_vars => properties}
   orchestration_service.display               = true
   orchestration_service.parent_service        = parent_service
   orchestration_service.launch_job 
@@ -23,19 +23,26 @@ begin
   parent_service = $evm.root['service_template_provision_task'].destination
   parent_service.name = $evm.root.attributes['dialog_service_name']
   
-  template_name         = 'OPNFV-demo'
-  ansible_manager_name  = 'ansible Configuration Manager'
-  
-  network_service       = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
-  configuration_manager = $evm.vmdb('ManageIQ_Providers_AnsibleTower_ConfigurationManager').find_by_name(ansible_manager_name)
-  template              = $evm.vmdb('ConfigurationScript').find_by_name(template_name)
-  
-  $evm.log("info", "Found template #{template.name}")
-  
-  vms = parent_service.direct_service_children.collect(&:vms).flatten
-  vms                   = [vms[0], vms[1]]
+  parent_service.direct_service_children.each do |vnf_service|
+    # There can be more types of services, we are interested in services with ansible job name defined
+    # under properties
+    json_properties = vnf_service.custom_get('properties') || '{}'
+    properties = JSON.parse(json_properties) 
+    ansible_manager_name  = properties['ansible_vim_id']
+    template_name         = properties['ansible_template_name']
     
-  launch_ansible_job(configuration_manager, network_service, parent_service, template, vms)
+    next if !template_name || !ansible_manager_name
+    
+    network_service       = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
+    configuration_manager = $evm.vmdb('ManageIQ_Providers_AnsibleTower_ConfigurationManager').find_by_name(ansible_manager_name)
+    template              = $evm.vmdb('ConfigurationScript').find_by_name(template_name)
+    
+    next if !template || !configuration_manager
+    $evm.log("info", "Found template #{template.name}")
+
+    launch_ansible_job(configuration_manager, network_service, vnf_service, template, vnf_service.vms, properties)
+  end
+ 
 rescue => err
   $evm.log(:error, "[#{err}]\n#{err.backtrace.join("\n")}") 
   $evm.root['ae_result'] = 'error'
