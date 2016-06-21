@@ -45,7 +45,7 @@ def get_template(orchestration_manager, network_service, parent_service, vnf_ser
   substitution_mappings_requirements = template_content['topology_template']['substitution_mappings']['requirements']
   $evm.log("info", "Substitution mappings requirements Type: #{substitution_mappings_requirements}")  
   
-  vnf_template_name = "#{parent_service.name} #{vnf_service.name} #{vnf_service.custom_get('type')}"
+  vnf_template_name = "#{parent_service.name} #{vnf_service.name} #{vnf_service.custom_get('type')} #{parent_service.id}"
   $evm.log("info", "VNF template name: #{vnf_template_name}")
 
   vnf_service_properties = JSON.parse(vnf_service.custom_get('properties'))
@@ -131,8 +131,10 @@ def deploy_vnf_stack(orchestration_manager, network_service, parent_service, vnf
   template = get_template(orchestration_manager, network_service, parent_service, vnf_service)
   
   # TODO should we filter passed params based on inputs in VNFD?
-  params = JSON.parse(vnf_service.custom_get('properties')).to_json
+  params = JSON.parse(vnf_service.custom_get('properties'))
+  params['type'] = vnf_service.custom_get('type')
   
+  params = params.to_json
   
   orchestration_service = $evm.vmdb('ServiceOrchestration').create(
     :name => "#{parent_service.name} #{vnf_service.name}")

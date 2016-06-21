@@ -41,7 +41,7 @@ def get_networks_template(network_service, parent_service)
     template_content['resources'][subnet_name]['type'] = 'OS::Neutron::Subnet'
   end
   
-  vnf_networks_template_name = "#{parent_service.name} #{Time.now.to_i} networks"
+  vnf_networks_template_name = "#{parent_service.name} networks #{parent_service.id}"
   
   template = $evm.vmdb('orchestration_template_hot').create(
     :name      => vnf_networks_template_name, 
