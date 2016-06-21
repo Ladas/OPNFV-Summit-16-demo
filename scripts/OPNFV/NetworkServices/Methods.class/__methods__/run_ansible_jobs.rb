@@ -4,6 +4,9 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
   
   $evm.log(:info, "Running Ansible Tower template on VM of the type: #{vms.first.type}")
   if vms.first.type == "ManageIQ::Providers::Amazon::CloudManager::Vm"
+    # TODO figure out, how to pass elastic ip as part of VM inventory, this will work only
+    # with 1 VM per stack
+    properties['elastic_ip'] = vms.first.floating_ips.detect { |x| x.network_port.cloud_subnets.detect { |subnet| subnet.name == 'InterCloud' } }.try(:address)
     vm_names = vms.collect(&:ipaddresses).join(",")
   else
     vm_names = vms.collect(&:name).join(",")
