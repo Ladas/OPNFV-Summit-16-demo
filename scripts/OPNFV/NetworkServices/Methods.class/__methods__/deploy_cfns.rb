@@ -1,16 +1,8 @@
-def template_interface(name, subnet_id, security_group)
+def template_interface(name, subnet_id, security_group, subnet_name)
   eip = "#{name}Address"
   eip_association = "Associate#{name}"
   network_interface = "#{name}"
-  {
-    eip => {
-      "Type"=>"AWS::EC2::EIP",
-      "Properties"=>{"Domain"=>"vpc"}},
-    eip_association => {
-      "Type"=>"AWS::EC2::EIPAssociation",
-      "Properties"=>
-      {"AllocationId"=>{"Fn::GetAtt"=>[eip, "AllocationId"]},
-        "NetworkInterfaceId"=>{"Ref"=>network_interface}}},
+  interface = {
     network_interface => {
       "Type"=>"AWS::EC2::NetworkInterface",
       "Properties" => {
@@ -20,6 +12,19 @@ def template_interface(name, subnet_id, security_group)
         "SourceDestCheck"=>"true",
         "Tags"=>[{"Key"=>"Network", "Value"=>"Control"}]}},
   }
+  if subnet_name == "CloudExternal"
+    interface.merge!(
+      eip => {
+        "Type"=>"AWS::EC2::EIP",
+        "Properties"=>{"Domain"=>"vpc"}},
+      eip_association => {
+        "Type"=>"AWS::EC2::EIPAssociation",
+        "Properties"=>
+        {"AllocationId"=>{"Fn::GetAtt"=>[eip, "AllocationId"]},
+          "NetworkInterfaceId"=>{"Ref"=>network_interface}}},
+    )
+  end  
+  interface
 end
 
 def security_group(security_group, vpc_id)
@@ -86,12 +91,14 @@ def instance(name, network_interfaces, keyname, image_id,availability_zone,insta
             ["",
               ["#!/bin/bash -ex",
                 "\n",
+                "ip route del 0/0",
                 "\n",
-                "yum install ec2-net-utils -y",
+                "ip route del 0/0",
                 "\n",
-                "ec2ifup eth1",
+                "ip route del 0/0",
                 "\n",
-                "service httpd start"]]}}}}
+                "ip r a default via 10.0.4.1 dev eth0",
+                "\n"]]}}}}
   }
 end
 
@@ -141,7 +148,7 @@ def create_template(name,nsd_properties,nsd_requirements)
         nic<< value.gsub("\s", "").gsub("_", "")
         security_group_name="DefaultSecurity"+value.gsub("\s", "").gsub("_", "")
         template_content["Resources"].merge!(security_group(security_group_name, network.ems_ref))
-        template_content["Resources"].merge!(template_interface(value.gsub("\s", "").gsub("_", ""), subnet.ems_ref, security_group_name))
+        template_content["Resources"].merge!(template_interface(value.gsub("\s", "").gsub("_", ""), subnet.ems_ref, security_group_name, subnet.name))
       end
     end
   end
