@@ -24,16 +24,29 @@ end
 
 def security_group(security_group, vpc_id)
   {
-    security_group =>
-    {"Type"=>"AWS::EC2::SecurityGroup",
-      "Properties"=>
-      {"VpcId"=> vpc_id,
-        "GroupDescription"=>"Enable SSH access via port 22",
-        "SecurityGroupIngress"=>
-        [{"IpProtocol"=>"tcp",
-            "FromPort"=>"22",
-            "ToPort"=>"22",
-            "CidrIp"=>"0.0.0.0/0"}]}},
+    security_group => {
+      "Type"=>"AWS::EC2::SecurityGroup",
+      "Properties"=> {
+        "VpcId"=> vpc_id,
+        "GroupDescription"=>"Enable all",
+        "SecurityGroupIngress"=> [{
+          "IpProtocol"=>"tcp",
+          "FromPort"=>"0",
+          "ToPort"=>"65535",
+          "CidrIp"=>"0.0.0.0/0"
+        }, {
+          "IpProtocol"=>"udp",
+          "FromPort"=>"0",
+          "ToPort"=>"65535",
+          "CidrIp"=>"0.0.0.0/0"
+        }, {
+          "IpProtocol"=>"icmp",
+          "FromPort"=>"-1",
+          "ToPort"=>"-1",
+          "CidrIp"=>"0.0.0.0/0"  
+        }]
+      }
+    },
   }
 end
 
