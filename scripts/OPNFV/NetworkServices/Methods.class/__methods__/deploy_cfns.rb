@@ -76,8 +76,8 @@ def instance(name, network_interfaces, keyname, image_id,availability_zone,insta
   end
 
   {
-    name =>
-    {"Type"=>"AWS::EC2::Instance",
+    name => {
+      "Type"=>"AWS::EC2::Instance",
       "Properties"=> {
         "InstanceType" => instance_type,
         "ImageId"=> image_id,
@@ -91,13 +91,12 @@ def instance(name, network_interfaces, keyname, image_id,availability_zone,insta
             ["",
               ["#!/bin/bash -ex",
                 "\n",
-                "ip route del 0/0",
+                "echo \"GATEWAYDEV=eth0\" | tee -a /etc/sysconfig/network",
                 "\n",
-                "ip route del 0/0",
+                "ip route del default dev1",
                 "\n",
-                "ip route del 0/0",
+                "ip route del default dev2",
                 "\n",
-                "ip r a default via 10.0.4.1 dev eth0",
                 "\n"]]}}}}
   }
 end
