@@ -170,7 +170,7 @@ def deploy_amazon_stack(orchestration_manager, parent_service, vnf_service)
   $evm.log("info", "Listing nsd_requirements #{nsd_requirements}")
   $evm.log("info", "Listing nsd_capabilities #{nsd_capabilities}")
 
-  name = "#{parent_service.name} #{vnf_service.name}"
+  name = "#{parent_service.name} #{vnf_service.name} #{parent_service.id}"
   template = create_template(name,nsd_properties,nsd_requirements)
 
   $evm.log("info", "Deploying CFN template #{name}")
