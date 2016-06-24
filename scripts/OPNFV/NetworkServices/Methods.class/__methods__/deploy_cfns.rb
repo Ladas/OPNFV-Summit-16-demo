@@ -93,10 +93,13 @@ def instance(name, network_interfaces, keyname, image_id,availability_zone,insta
                 "\n",
                 "echo \"GATEWAYDEV=eth0\" | tee -a /etc/sysconfig/network",
                 "\n",
+                "systemctl restart network",
+                "\n",
                 "ip route del default dev eth1",
                 "\n",
                 "ip route del default dev eth2",
                 "\n",
+                "ip r",
                 "\n",
                 "\n"]]}}}}
   }
