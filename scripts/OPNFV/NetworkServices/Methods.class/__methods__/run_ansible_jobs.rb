@@ -6,12 +6,12 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
   if vms.first.type == "ManageIQ::Providers::Amazon::CloudManager::Vm"
     # TODO figure out, how to pass elastic ip as part of VM inventory, this will work only
     # with 1 VM per stack
-    properties['elastic_ip'] = vms.first.floating_ips.detect { |x| x.network_port.cloud_subnets.detect { |subnet| subnet.name == 'InterCloud' } }.try(:address)
     vm_names = vms.collect(&:ipaddresses).join(",")
   else
     vm_names = vms.collect(&:name).join(",")
   end
-  $evm.log(:info, "Running Ansible Tower template: #{template.name} on VMs: #{vm_names}")
+  $evm.log(:info, "Running Ansible Tower template: #{template.name} on VMs: #{vm_names} with properties: #{properties}")
+  
   
   orchestration_service.job_template          = template
   orchestration_service.configuration_manager = configuration_manager
@@ -20,6 +20,13 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
   orchestration_service.parent_service        = parent_service
   orchestration_service.launch_job 
 end
+
+def get_vpn_server_ip(parent_service)
+  # For now, our AWS VM will be the vpn server
+  vm = parent_service.direct_service_children.collect(&:vms).flatten.detect { |x| x.type == "ManageIQ::Providers::Amazon::CloudManager::Vm" }
+  $evm.log(:info, "Finding VPN server VM: #{vm.try(:name)}")
+  vm.floating_ips.detect { |x| x.network_port.cloud_subnets.detect { |subnet| subnet.name == 'CloudExternal' }}.try(:address)
+end  
 
 begin
   nsd = $evm.get_state_var(:nsd)
@@ -31,13 +38,17 @@ begin
   parent_service = $evm.root['service_template_provision_task'].destination
   parent_service.name = $evm.root.attributes['dialog_service_name']
   
+  vpn_server_ip = get_vpn_server_ip(parent_service)
+  
   parent_service.direct_service_children.each do |vnf_service|
     # There can be more types of services, we are interested in services with ansible job name defined
     # under properties
     json_properties = vnf_service.custom_get('properties') || '{}'
     properties = JSON.parse(json_properties) 
-    ansible_manager_name  = properties['ansible_vim_id']
-    template_name         = properties['ansible_template_name']
+    properties['vpn_server_ip'] = vpn_server_ip
+    
+    ansible_manager_name = properties['ansible_vim_id']
+    template_name        = properties['ansible_template_name']
     
     next if !template_name || !ansible_manager_name
     
