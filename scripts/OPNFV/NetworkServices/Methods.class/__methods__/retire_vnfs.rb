@@ -5,30 +5,69 @@ def retire_vnfs(network_service)
   network_service.direct_service_children.each do |vnf_service| 
     
     if !vnf_service.name.include? " networks"
-      
+     
       # This a VNF service
       
-      stack = $evm.vmdb('ManageIQ_Providers_Openstack_CloudManager_Vnf').find_by_name(vnf_service.name)
+      stack = $evm.vmdb('ManageIQ_Providers_Openstack_CloudManager_Vnf').find_by_name("#{vnf_service.name} #{network_service.id}")
       
       if stack != nil
-        begin
-          if vnf_service.retirement_state != 'retiring' and vnf_service.retirement_state != 'retired'
-           
+        
+        # Tacker stack
+
+        if vnf_service.orchestration_stack_status[0] == 'create_complete'
+          stack.raw_delete_stack()
+          $evm.log(:info, "Retiring #{vnf_service.name}")
+          vnf_service.retire_now()
+          found_stack = true
+        elsif vnf_service.orchestration_stack_status[0] == 'transient'
+          found_stack = true
+        end
+      else
+        
+        # Could be a Tacker template remaining...
+            
+        template = $evm.vmdb('orchestration_template_vnfd').find_by_name("#{vnf_service.name} #{JSON.parse(vnf_service.custom_get('properties'))['type']} #{network_service.id}")
+
+        if template != nil
+          
+          if vnf_service.orchestration_stack_status[0] == 'create_complete' or vnf_service.orchestration_stack_status[0] == 'transient'
+            found_stack = true
+            next
+          end
+          
+          $evm.log(:info, "Deleting #{vnf_service.name} VNFD orchestration template")
+          temp_vnfd = $evm.vmdb('orchestration_template_vnfd')
+          temp_vnfd.destroy(template.id)
+        end
+        
+        # ...but also could be an AWS (CFN) stack
+        
+        stack_name = "#{vnf_service.name.gsub('\s', '-').gsub('_', '-').gsub(' ', '-')}-#{network_service.id}"
+    
+        stack = $evm.vmdb('ManageIQ_Providers_Amazon_CloudManager_OrchestrationStack').find_by_name(stack_name)
+        
+        if stack != nil
+          
+          if vnf_service.orchestration_stack_status[0] == 'create_complete'
             stack.raw_delete_stack()
             $evm.log(:info, "Retiring #{vnf_service.name}")
             vnf_service.retire_now()
             found_stack = true
-            
-            # Delete associated vnfd template?
-            
-            template = $evm.vmdb('orchestration_template_vnfd').find_by_name("#{vnf_service.name} #{JSON.parse(vnf_service.custom_get('properties'))['type']} #{network_service.id}")
-            
+          elsif vnf_service.orchestration_stack_status[0] == 'transient'
+            found_stack = true
+          end
+        else
+          
+          if vnf_service.orchestration_stack_status[0] == 'create_complete' or vnf_service.orchestration_stack_status[0] == 'transient'
+            found_stack = true
+          else
+            template = $evm.vmdb('orchestration_template_cfn').find_by_name("#{vnf_service.name} #{network_service.id}")
+
             if template != nil
-              $evm.log(:info, "Deleting #{vnf_service.name} VNFD orchestration template")
-              #$evm.vmdb('orchestration_template_vnfd').destroy(template.id)
+              $evm.log(:info, "Deleting #{vnf_service.name} CFN orchestration template")
+              $evm.vmdb('orchestration_template_cfn').destroy(template.id)
             end
           end
-        rescue => err
         end
       end
     else
@@ -39,7 +78,7 @@ def retire_vnfs(network_service)
       
       if template != nil
         $evm.log(:info, "Deleting #{vnf_service.name} networks HOT orchestration template")
-        #$evm.vmdb('orchestration_template_hot').destroy(template.id)
+        $evm.vmdb('orchestration_template_hot').destroy(template.id)
       end
     end
   end  
