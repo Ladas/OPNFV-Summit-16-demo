@@ -1,0 +1,1 @@
+To facilitate communication between Ansible Tower and OpenStack, a common network should be created that is visible to both the Ansible Tower installation and the OpenStack cloud.  In the demo, the OS cloud had a provider network that was directly accessible by the Ansible Tower VM.  

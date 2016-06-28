@@ -1,0 +1,2 @@
+# This file contains additional setup information for the Liberty version of OpenStack used in the demo
+

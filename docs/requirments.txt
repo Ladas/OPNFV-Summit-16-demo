@@ -1,0 +1,16 @@
+OpenStack Cloud -- Liberty Release
+  Preferably 1 controller + 1 or greater compute nodes
+  Tacker Installed in OS Cloud -- Mikata Stable Release
+ManageIQ -- An installed Darga Release (Follow http://manageiq.org/documentation/development/developer_setup/)
+  repo:   git@github.com:ladas/manageiq.git
+  branch: add_support_of_vnfd_templates_and_vnf_stacks
+Ansible Tower
+  Need a free 60 day trial license for 50 hosts
+OPNFV demo Ansible Project
+  git@github.com:atyronesmith/OPNFV-demo-ansible.git
+OPNFV demo project
+  git@github.com:Ladas/OPNFV-Summit-16-demo.git
+AWS Account with API access
+
+
+

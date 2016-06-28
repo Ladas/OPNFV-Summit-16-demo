@@ -1,0 +1,8 @@
+# steps for setting up Ansible Tower for the OPNFV Summit 2016 demo
+#
+Ansible Tower ran in a Centos VM
+
+#
+#
+#
+
