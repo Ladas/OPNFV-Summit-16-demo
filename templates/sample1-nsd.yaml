@@ -1,0 +1,183 @@
+tosca_definitions_version:      tosca_simple_profile_for_nfv_1_0_0
+
+description: OPNFV demo NSD
+
+metadata:
+    ID: OPNFV demo                          # ID of this Network Service Descriptor
+    vendor: Red Hat Inc.                    # Provider or vendor of the Network Service
+    version: 1                              # Version of the Network Service Descriptor
+
+topology_template:
+  inputs:
+  node_templates:
+    VNF1:
+        type: tosca.nodes.nfv.VNF.CloudRouter
+        properties:
+          vim_id: openstack-nfvpe  # ManageIQ provider entry for openstack cloud
+          vendor: cloudrouter
+          id: 1
+          version: 1
+          ansible_template_name: OPNFV-demo-client
+          ansible_vim_id: ansible Configuration Manager
+
+        requirements:
+          - virtualLink1: CloudExternal # the subsititution mappings in VNF1 has virtualLink1:    [CP1, virtualLink]
+          - virtualLink2: VL1           # the subsititution mappings in VNF1 has virtualLink2:    [CP2, virtualLink]
+          - virtualLink3: VL2           # the subsititution mappings in VNF1 has virtualLink3:    [CP3, virtualLink]
+          - virtualLink4:               # the subsititution mappings in VNF1 has virtualLink4:    [CP4, virtualLink]
+          - virtualLinkMgmt: net_mgmt   # the subsititution mappings in VNF1 has virtualLinkMgmt: [CP5, virtualLink]
+
+        capabilities:
+          forwarder1:       # the subsititution mappings in VNF1 has forwarder1: [CP1, forwarder]
+          forwarder2:       # the subsititution mappings in VNF1 has forwarder2: [CP2, forwarder]
+          forwarder3:       # the subsititution mappings in VNF1 has forwarder3: [CP3, forwarder]
+
+    VNF2:
+        type: tosca.nodes.nfv.VNF.CloudRouter
+        properties:
+          vim_id: openstack-nfvpe # ManageIQ provider entry for openstack cloud
+          vendor: cloudrouter
+          id: 2
+          version: 1
+          ansible_template_name: OPNFV-demo-client
+          ansible_vim_id: ansible Configuration Manager
+
+        requirements:
+          - virtualLink1: CloudExternal # the subsititution mappings in VNF1 has virtualLink1:    [CP1, virtualLink]
+          - virtualLink2: VL2           # the subsititution mappings in VNF1 has virtualLink2:    [CP2, virtualLink]
+          - virtualLink3: VL3           # the subsititution mappings in VNF1 has virtualLink3:    [CP3, virtualLink]
+          - virtualLink4:               # the subsititution mappings in VNF1 has virtualLink4     [CP4, virtualLink]
+          - virtualLinkMgmt: net_mgmt     # the subsititution mappings in VNF1 has virtualLinkMgmt: [CP5, virtualLink]
+
+        capabilities:
+          - forwarder1:       # the subsititution mappings in VNF1 has forwarder1: [CP1, forwarder]
+          - forwarder2:       # the subsititution mappings in VNF1 has forwarder2: [CP2, forwarder]
+          - forwarder3:       # the subsititution mappings in VNF1 has forwarder3: [CP3, forwarder]
+
+    VNF3:
+        type: tosca.nodes.nfv.VNF.CloudRouter
+        properties:
+          vim_id: openstack-nfvpe # ManageIQ provider entry for openstack cloud
+          vendor: cloudrouter
+          id: 3
+          version: 1
+          ansible_template_name: OPNFV-demo-client
+          ansible_vim_id: ansible Configuration Manager
+
+        requirements:
+          - virtualLink1: CloudExternal # the subsititution mappings in VNF1 has virtualLink1:    [CP1, virtualLink]
+          - virtualLink2: VL1           # the subsititution mappings in VNF1 has virtualLink2:    [CP2, virtualLink]
+          - virtualLink3: VL3           # the subsititution mappings in VNF1 has virtualLink3:    [CP3, virtualLink]
+          - virtualLink4: InterCloud    # the subsititution mappings in VNF1 has virtualLink4:    [CP4, virtualLink]
+          - virtualLinkMgmt: net_mgmt   # the subsititution mappings in VNF1 has virtualLinkMgmt: [CP5, virtualLink]
+
+        capabilities:
+          forwarder1:       # the subsititution mappings in VNF1 has forwarder1: [CP1, forwarder]
+          forwarder2:       # the subsititution mappings in VNF1 has forwarder2: [CP2, forwarder]
+          forwarder4:       # the subsititution mappings in VNF1 has forwarder4: [CP4, forwarder]
+
+    VNF4:
+        type: tosca.nodes.nfv.VNF.CloudRouter
+        properties:
+          vim_id: amazon # ManageIQ provider entry for AWS VPC
+          vendor: cloudrouter
+          id: 4
+          image_id: OPNFVCloudRouter  #ami name
+          image_type: t2.medium
+          vpc_id: openshift2  #aws vpc name
+          availabilityzone: us-east-1b
+          key_name: red-hat #change this to match
+          version: 1
+          ansible_template_name: OPNFV-demo-server
+          ansible_vim_id: ansible Configuration Manager
+
+        requirements:
+          - virtualLink1:               # the subsititution mappings in VNF1 has virtualLink1:    [CP1, virtualLink]
+          - virtualLink2:               # the subsititution mappings in VNF1 has virtualLink2:    [CP2, virtualLink]
+          - virtualLink3: CloudExternal # the subsititution mappings in VNF1 has virtualLink3:    [CP3, virtualLink]
+          - virtualLink4: InterCloud    # the subsititution mappings in VNF1 has virtualLink4:    [CP4, virtualLink]
+          - virtualLinkMgmt: net_mgmt    # the subsititution mappings in VNF1 has virtualLinkMgmt: [CP5, virtualLink]
+
+        capabilities:
+          forwarder3:       # the subsititution mappings in VNF1 has forwarder3: [CP3, forwarder]
+          forwarder4:       # the subsititution mappings in VNF1 has forwarder4: [CP4, forwarder]
+
+    CPnsd1:
+        type: tosca.nodes.nfv.CP
+        properties:
+            type:
+        requirements:
+          - virtualBinding:
+              node: VNF1
+          - virtualLink:
+              node: CloudExternal
+
+    CPnsd2:
+        type: tosca.nodes.nfv.CP
+        properties:
+            type:
+        requirements:
+          - virtualBinding:
+              node: VNF2
+          - virtualLink:
+              node: CloudExternal
+
+
+    CPnsd3: #endpoints of NS
+        type: tosca.nodes.nfv.CP
+        properties:
+          type:
+        requirements:
+          - virtualBinding:
+              node: VNF4
+          - virtualLink:
+              node: VLIMS
+
+    net_mgmt:
+        type: tosca.nodes.nfv.VL
+        properties:
+          network_type: flat
+          vendor: openstack
+          cidr: 10.1.0.0/24
+
+    CloudExternal:
+        type: tosca.nodes.nfv.VL
+        properties:
+          network_type: flat
+          vendor: openstack
+          cidr: 10.2.0.0/24
+
+    VL1:
+        type: tosca.nodes.nfv.VL
+        properties:
+          network_type: something
+          vendor: openstack
+          cidr: 10.3.0.0/24
+
+    VL2:
+        type: tosca.nodes.nfv.VL
+        properties:
+          network_type: something
+          vendor: openstack
+          cidr: 10.4.0.0/24
+
+    VL3:
+        type: tosca.nodes.nfv.VL
+        properties:
+          network_type: something
+          vendor: openstack
+          cidr: 10.5.0.0/24
+
+    InterCloud:
+        type: tosca.nodes.nfv.VL
+        properties:
+          network_type: something
+          vendor: openstack
+          cidr: 10.6.0.0/24
+
+    VLIMS:
+        type: tosca.nodes.nfv.VL
+        properties:
+          network_type: something
+          vendor: openstack
+          cidr: 10.7.0.0/24
