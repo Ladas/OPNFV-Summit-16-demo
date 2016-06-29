@@ -1,0 +1,274 @@
+{
+  "Description": "OPNFVDemoServiceDeploy VNF4 743 CFN template",
+  "Resources": {
+    "DefaultSecurityCloudExternal": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": "vpc-7239c615",
+        "GroupDescription": "Enable all",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "CloudExternal": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "Properties": {
+        "SubnetId": "subnet-7616214b",
+        "Description": "",
+        "GroupSet": [
+          {
+            "Ref": "DefaultSecurityCloudExternal"
+          }
+        ],
+        "SourceDestCheck": "true",
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "Control"
+          }
+        ]
+      }
+    },
+    "CloudExternalAddress": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "AssociateCloudExternal": {
+      "Type": "AWS::EC2::EIPAssociation",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "CloudExternalAddress",
+            "AllocationId"
+          ]
+        },
+        "NetworkInterfaceId": {
+          "Ref": "CloudExternal"
+        }
+      }
+    },
+    "DefaultSecurityvlims": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": "vpc-7239c615",
+        "GroupDescription": "Enable all",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "vlims": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "Properties": {
+        "SubnetId": "subnet-be98b383",
+        "Description": "",
+        "GroupSet": [
+          {
+            "Ref": "DefaultSecurityvlims"
+          }
+        ],
+        "SourceDestCheck": "true",
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "Control"
+          }
+        ]
+      }
+    },
+    "DefaultSecurityInterCloud": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": "vpc-7239c615",
+        "GroupDescription": "Enable all",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "InterCloud": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "Properties": {
+        "SubnetId": "subnet-7716214a",
+        "Description": "",
+        "GroupSet": [
+          {
+            "Ref": "DefaultSecurityInterCloud"
+          }
+        ],
+        "SourceDestCheck": "true",
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "Control"
+          }
+        ]
+      }
+    },
+    "DefaultSecuritynetmgmt": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": "vpc-7239c615",
+        "GroupDescription": "Enable all",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "netmgmt": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "Properties": {
+        "SubnetId": "subnet-7316214e",
+        "Description": "",
+        "GroupSet": [
+          {
+            "Ref": "DefaultSecuritynetmgmt"
+          }
+        ],
+        "SourceDestCheck": "true",
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "Control"
+          }
+        ]
+      }
+    },
+    "Ec2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "m4.xlarge",
+        "ImageId": "ami-933afafe",
+        "KeyName": "red-hat",
+        "AvailabilityZone": "us-east-1b",
+        "NetworkInterfaces": [
+          {
+            "NetworkInterfaceId": {
+              "Ref": "CloudExternal"
+            },
+            "DeviceIndex": "0"
+          },
+          {
+            "NetworkInterfaceId": {
+              "Ref": "vlims"
+            },
+            "DeviceIndex": "1"
+          },
+          {
+            "NetworkInterfaceId": {
+              "Ref": "InterCloud"
+            },
+            "DeviceIndex": "2"
+          },
+          {
+            "NetworkInterfaceId": {
+              "Ref": "netmgmt"
+            },
+            "DeviceIndex": "3"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Role",
+            "Value": "Test Instance"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -ex",
+                "\n",
+                "echo \"GATEWAYDEV=eth0\" | tee -a /etc/sysconfig/network",
+                "\n",
+                "rm /etc/sysconfig/network-scripts/ifcfg-ens2",
+                "\n",
+                "cat > /etc/sysconfig/network-scripts/ifcfg-eth1 << EOF\nDEVICE=\"eth1\"\nBOOTPROTO=\"dhcp\"\nONBOOT=\"yes\"\nTYPE=\"Ethernet\"\nPERSISTENT_DHCLIENT=\"yes\"\nNM_CONTROLLED=no\nEOF\n",
+                "\n",
+                "cat > /etc/sysconfig/network-scripts/ifcfg-eth2 << EOF\nDEVICE=\"eth2\"\nBOOTPROTO=\"dhcp\"\nONBOOT=\"yes\"\nTYPE=\"Ethernet\"\nPERSISTENT_DHCLIENT=\"yes\"\nNM_CONTROLLED=no\nEOF\n",
+                "\n",
+                "systemctl restart network",
+                "\n",
+                "ip r",
+                "\n",
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    }
+  }
+}

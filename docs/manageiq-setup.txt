@@ -1,2 +1,0 @@
-ManageIQ ran as a Fedora 23 VM.  The VM was managed by Vagrant.
-

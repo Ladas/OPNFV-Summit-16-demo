@@ -6,3 +6,6 @@ Ansible Tower ran in a Centos VM
 #
 #
 
+tower-cli project create --name "test-client" --description "This is a test" --scm-type git --scm-url "git@github.com:atyronesmith/OPNFV-demo-ansible.git" --scm-clean true --scm-delete-on-update true --scm-update-on-launch true --scm-credential 4
+
+

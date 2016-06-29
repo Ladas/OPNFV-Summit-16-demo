@@ -1,0 +1,57 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters" : {
+     "AvailabilityZoneParameter" : {
+    "Type" : "String",
+    "Default" : "us-east-1b",
+    "AllowedValues" : ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d"],
+    "Description" : "Enter AvailabilityZone"
+  },
+  "VPCParameter" : {
+    "Type" : "String",
+    "Default" : "vpc-7239c615",
+    "Description" : "Enter VPC id from ams"
+  }
+},
+   "Resources": {
+    "InterCloud": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": { "Ref" : "VPCParameter" },
+        "CidrBlock": "10.0.2.0/24",
+        "AvailabilityZone": { "Ref" : "AvailabilityZoneParameter" },
+         "Tags" : [ { "Key" : "Name", "Value" : "InterCloud" } ]
+      }
+    },
+    "NetMgmt": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": { "Ref" : "VPCParameter" },
+        "CidrBlock": "10.0.3.0/24",
+        "MapPublicIpOnLaunch":"true",
+        "AvailabilityZone": { "Ref" : "AvailabilityZoneParameter" },
+         "Tags" : [ { "Key" : "Name", "Value" : "net_mgmt" } ]
+      }
+    },
+    "CloudExternal": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": { "Ref" : "VPCParameter" },
+        "CidrBlock": "10.0.4.0/24",
+         "MapPublicIpOnLaunch":"true",
+        "AvailabilityZone": { "Ref" : "AvailabilityZoneParameter" },
+         "Tags" : [ { "Key" : "Name", "Value" : "CloudExternal" } ]
+      }
+    },
+     "vlims": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": { "Ref" : "VPCParameter" },
+        "CidrBlock": "10.0.1.0/24",
+         "MapPublicIpOnLaunch":"true",
+        "AvailabilityZone": { "Ref" : "AvailabilityZoneParameter" },
+         "Tags" : [ { "Key" : "Name", "Value" : "vlims" } ]
+      }
+    }
+  }
+}
