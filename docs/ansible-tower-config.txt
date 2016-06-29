@@ -1,11 +1,72 @@
-# steps for setting up Ansible Tower for the OPNFV Summit 2016 demo
-#
-Ansible Tower ran in a Centos VM
+## Steps for setting up Ansible Tower for the OPNFV Summit 2016 demo
 
-#
-#
-#
+### Ansible Tower Install 
+For the demo, Ansible Tower was installed on Centos 7 on a VM running on the same machine as
+a virtual cloud deploy.  Ansible Tower was installed by visiting: https://www.ansible.com/tower-trial.
+This method was used as Ansible Tower was to be installed on a machine running libvirt.
 
-tower-cli project create --name "test-client" --description "This is a test" --scm-type git --scm-url "git@github.com:atyronesmith/OPNFV-demo-ansible.git" --scm-clean true --scm-delete-on-update true --scm-update-on-launch true --scm-credential 4
+If you plan to run Ansible Tower on a machine with VirtualBox, a quicker method of using vagrant directly
+would be:
+    $ vagrant init ansible/tower
+    $ vagrant up --provider virtualbox
+    $ vagrant ssh
+
+After installation of ansible tower, 
+    Install tower-cli
+    tower-cli config host localhost
+    tower-cli config username admin
+    tower-cli config password YOUR_PASSWORD_HERE
+    tower-cli config verify_ssl false
+
+To use Ansible Tower you need to do roughly the following:
+  1. Create Credentials for each environment you need to access
+     a. AWS API
+     b. AWS Key Pair
+     c. OpenStack Admin login (For discovery)
+     d. OpenStack Key Pair 
+     e. github account
+  2. Create a Project which references the git@github.com:atyronesmith/OPNFV-demo-ansible.git repository
+     During each run, Ansible Tower will update from this repo to get the latest Ansible Playbooks
+  3. Create an Inventory to discover instances on OpenStack and AWS.  An inventory is run after each deploy
+     to discover any newly deployed VMs.
+  4. Create a Job Template.  A Job Template specifies an Inventory and Project to use.  It also selects a playbook present in the Project.  A machine credential is also specified.  
+  5. The Ansible Tower Job Template created above will be invoked by ManageIQ using the Job Template name specified in the TOSCA NSD file.
+
+## Add Credentials to Ansible Tower 
+### Add crendential for AWS API
+    tower-cli crendential --name AWS-DEMO-API --description "AWS API Credentials" --kind aws --username AWS_ACCESS_KEY --password AWS_SECRET_KEY 
+
+### Add credential for AWS key pair
+    tower-cli crednetial --name AWS-DEMO-KEY-PAIR --description "SSH key pair" --kind ssh --cloud false --username opnfv --password "" --ssh-key-data ./ssh/aws-private-key 
+
+### Add credential for OpenStack Cloud
+    tower-cli crednetial --name OS-DEMO-LOGIN --description "OS Login" --kind openstack --cloud true --username admin --password ADMIN_PASSWORD 
+
+### Add credential for OpenSTack key pair
+    tower-cli credential --name OS-DEMO-KEY-PAIR --description "SSH key pair" --kind ssh --username opnfv --password "" --ssh-key-data ./ssh/os-private-key 
+ 
+## Create demo project
+tower-cli project create --name "OPNFV-demo" --description "Project for OPNFV Summit 2016 ManageIQ demo" --scm-type git --scm-url "https://github.com/atyronesmith/OPNFV-demo-ansible.git" --scm-clean true --scm-delete-on-update true --scm-update-on-launch true  
+
+## Create inventories
+
+### AWS Inventory
+    tower-cli inventory create --name "AWS-DEMO" --description "Inventory of AWS Demo instances" --organization Default
+### AWS Inventory Group
+    tower-cli group create --name "AWS-DEMO-GROUP" --inventory "AWS-DEMO" --credential "AWS-DEMO-API" --source ec2 
+
+### OpenStack Inventory
+    tower-cli inventory create --name "OS-DEMO-INVENTORY" --description "Inventory of OpenStack instances" --organization Default
+
+### OpenStack Inventory Group
+    tower-cli group create --name "OS-DEMO-GROUP" --inventory "OS-DEMO-INVENTORY" --credential "OS-DEMO-LOGIN" --source openstack
+
+## Create Job Templates
+
+### Job Template for clients
+    tower-cli job_template create --name OPNFV-demo-client --description "All clients tasks"  --job-type run --inventory "OS-DEMO-INVENTORY" --project "OPNFV-demo" --playbook cr-vpn-clients.yml --machine-credential "OS-DEMO-KEY-PAIR" 
+
+### Job Template for server
+    tower-cli --name OPNFV-demo-server --description "All server tasks"  --job-type run --inventory "AWS-DEMO" --project "OPNFV-demo" --playbook cr-vpn-servers.yml --machine-credential "AWS-DEMO-KEY-PAIR" 
 
 
