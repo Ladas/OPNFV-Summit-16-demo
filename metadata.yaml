@@ -1,0 +1,10 @@
+---
+author: Ladas
+date: 2016-06-16
+name: OPNFV-Summit-16-demo
+slug: opnfv-summit-16-demo
+tags: automate, nfv, tacker, cfn, hot
+description: Integration with PHPIPAM to acquire/release IP addresses
+miq_ver: euwe
+dependencies: openstack, tacker, amazon
+src_url: https://github.com/Ladas/OPNFV-Summit-16-demo
