@@ -71,7 +71,7 @@ topology_template:
     CP1:
       type: tosca.nodes.nfv.CP.Tacker
       properties:
-        anti_spoofing_protection: true
+        anti_spoofing_protection: false
       requirements:
         - virtualBinding: 
             node: VDU1
@@ -79,7 +79,7 @@ topology_template:
     CP2:
       type: tosca.nodes.nfv.CP.Tacker
       properties:
-        anti_spoofing_protection: true
+        anti_spoofing_protection: false
       requirements:
         - virtualBinding: 
             node: VDU1
@@ -87,7 +87,7 @@ topology_template:
     CP3:
       type: tosca.nodes.nfv.CP.Tacker
       properties:
-        anti_spoofing_protection: true
+        anti_spoofing_protection: false
       requirements:
         - virtualBinding: 
             node: VDU1
@@ -95,7 +95,7 @@ topology_template:
     CP4:
       type: tosca.nodes.nfv.CP.Tacker
       properties:
-        anti_spoofing_protection: true
+        anti_spoofing_protection: false
       requirements:
         - virtualBinding: 
             node: VDU1
