@@ -95,9 +95,13 @@ def instance(name, network_interfaces, keyname, image_id,availability_zone,insta
                 "\n",
                 "rm /etc/sysconfig/network-scripts/ifcfg-ens2",
                 "\n",
-                "#{eth1_config}",
+                "#{ethx_config('eth1')}",
                 "\n",
-                "#{eth2_config}",
+                "#{ethx_config('eth2')}",
+                "\n",
+                "#{ethx_config('eth3')}",
+                "\n",
+                "ip r",
                 "\n",
                 "systemctl restart network",
                 "\n",
@@ -202,23 +206,10 @@ def deploy_cfns(network_service, parent_service)
   end
 end
 
-def eth1_config
+def ethx_config(ethx)
   <<-EOS
-cat > /etc/sysconfig/network-scripts/ifcfg-eth1 << EOF
-DEVICE="eth1"
-BOOTPROTO="dhcp"
-ONBOOT="yes"
-TYPE="Ethernet"
-PERSISTENT_DHCLIENT="yes"
-NM_CONTROLLED=no
-EOF
-  EOS
-end
-
-def eth2_config
-  <<-EOS
-cat > /etc/sysconfig/network-scripts/ifcfg-eth2 << EOF
-DEVICE="eth2"
+cat > /etc/sysconfig/network-scripts/ifcfg-#{ethx} << EOF
+DEVICE="#{ethx}"
 BOOTPROTO="dhcp"
 ONBOOT="yes"
 TYPE="Ethernet"
