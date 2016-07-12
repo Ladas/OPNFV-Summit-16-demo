@@ -38,6 +38,7 @@ def cps_for_id(network_service, id)
   cps
 end  
 
+require 'ipaddr'
 begin
   nsd = $evm.get_state_var(:nsd)
   $evm.log("info", "Listing nsd #{nsd}")
@@ -64,12 +65,22 @@ begin
     cluster[vim_id] ||= {}
     # TODO handle more vms per VNF
     vm = vnf_service.vms.first
-    cps_for_id(network_service, id).each do |connection_point|
+    cps_for_id(network_service, id).each_with_index do |connection_point, index|
       network_port = vm.network_ports.detect { |x| x.cloud_subnets.detect { |subnet| subnet.name.include?(connection_point) }}
       cluster[id][connection_point] = {
         :fixed_ips    => network_port.try(:fixed_ip_addresses), 
-        :floating_ips => network_port.try(:floating_ip_addresses)}
-      cluster[vim_id][connection_point] ||= {:cidrs => network_port.cloud_subnets.collect(&:cidr)} if network_port
+        :floating_ips => network_port.try(:floating_ip_addresses),
+        :interface    => "eth#{index}"}
+      if network_port
+        cidrs = network_port.cloud_subnets.collect(&:cidr)
+        cluster[vim_id][connection_point] ||= {:cidrs => cidrs} 
+        cidrs.each do |cidr|
+          ipaddr = IPAddr.new(cidr)
+          address = ipaddr.to_s
+          mask = /.*?\/(.*?)\>/.match(ipaddr.inspect)[1]
+          cluster[cidr] ||= {:address => address, :mask => mask}
+        end  
+      end
     end
   end
   
