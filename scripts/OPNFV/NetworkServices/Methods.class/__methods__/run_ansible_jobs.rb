@@ -54,6 +54,7 @@ begin
   vpn_server_ip = get_vpn_server_ip(parent_service)
   
   cluster = {}
+  subnets = {}
   parent_service.direct_service_children.each do |vnf_service|
     json_properties = vnf_service.custom_get('properties') || '{}'
     properties = JSON.parse(json_properties)
@@ -62,7 +63,7 @@ begin
     next unless id
     
     cluster[id] = {}
-    cluster[vim_id] ||= {}
+    subnets[vim_id] ||= {}
     # TODO handle more vms per VNF
     vm = vnf_service.vms.first
     cps_for_id(network_service, id).each_with_index do |connection_point, index|
@@ -71,14 +72,17 @@ begin
         :fixed_ips    => network_port.try(:fixed_ip_addresses), 
         :floating_ips => network_port.try(:floating_ip_addresses),
         :interface    => "eth#{index}"}
+      
       if network_port
         cidrs = network_port.cloud_subnets.collect(&:cidr)
-        cluster[vim_id][connection_point] ||= {:cidrs => cidrs} 
-        cidrs.each do |cidr|
-          ipaddr = IPAddr.new(cidr)
+        subnets[vim_id][connection_point] ||= {:cidrs => cidrs} 
+        cidrs.each_with_index do |cidr, index|
+          ipaddr  = IPAddr.new(cidr)
           address = ipaddr.to_s
-          mask = /.*?\/(.*?)\>/.match(ipaddr.inspect)[1]
-          cluster[cidr] ||= {:address => address, :mask => mask}
+          mask    = /.*?\/(.*?)\>/.match(ipaddr.inspect)[1]
+          
+          (subnets[vim_id][connection_point][:addresses] ||= [])[index] = address
+          (subnets[vim_id][connection_point][:masks] ||= [])[index]     = mask
         end  
       end
     end
@@ -91,6 +95,7 @@ begin
     properties = JSON.parse(json_properties) 
     properties['vpn_server_ip'] = vpn_server_ip
     properties['cluster']       = cluster
+    properties['subnets']       = subnets
     
     ansible_manager_name = properties['ansible_vim_id']
     template_name        = properties['ansible_template_name']
