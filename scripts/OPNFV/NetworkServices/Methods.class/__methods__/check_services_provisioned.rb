@@ -1,20 +1,6 @@
 #
-# Description: This method checks to see if the stack has been provisioned
-#   and whether the refresh has completed
+# Description: This method checks to see if the service stacks has been provisioned
 #
-
-def refresh_provider(service)
-  provider = service.orchestration_manager
-
-  $evm.log("info", "Refreshing provider #{provider.name}")
-  $evm.set_state_var('provider_last_refresh', provider.last_refresh_date.to_i)
-  provider.refresh
-end
-
-def refresh_may_have_completed?(service)
-  provider = service.orchestration_manager
-  provider.last_refresh_date.to_i > $evm.get_state_var('provider_last_refresh')
-end
 
 def check_deployed(service)
   finished     = false
@@ -22,7 +8,7 @@ def check_deployed(service)
   
   $evm.log("info", "Check service #{service.name} orchestration deployed")
   # check whether the stack deployment completed
-  status, reason = service.orchestration_stack_status
+  status, reason = service.orchestration_stack.normalized_live_status
   $evm.log("info", "Service #{service.name} deployment status. Status: #{status}, reason: #{reason}")
   
   case status.downcase
@@ -32,33 +18,12 @@ def check_deployed(service)
     error_reason = reason
   end
   
-  # TODO(do a proper waiting loop for refresh of all providers with their network managers)
-  if !service.vms.blank? && service.vms.collect(&:ipaddresses).flatten.blank?
-    $evm.log("info", "Waiting for #{service.name} to get IPs of VMs.")
-    finished = false
-  end 
-  
   $evm.log("info", "Please examine stack resources for more details") unless error_reason.blank?
 
   $evm.set_state_var('deploy_result', $evm.root['ae_result'])
   $evm.set_state_var('deploy_reason', $evm.root['ae_reason'])
 
-  refresh_provider(service)
-
   return finished, error_reason
-end
-
-def check_refreshed(service)
-  $evm.log("info", "Check refresh status of stack (#{service.stack_name})")
-
-  if refresh_may_have_completed?(service)
-    $evm.root['ae_result'] = $evm.get_state_var('deploy_result')
-    $evm.root['ae_reason'] = $evm.get_state_var('deploy_reason')
-    $evm.log("info", "Refresh completed.")
-  else
-    $evm.root['ae_result']         = 'retry'
-    $evm.root['ae_retry_interval'] = '30.seconds'
-  end
 end
 
 begin

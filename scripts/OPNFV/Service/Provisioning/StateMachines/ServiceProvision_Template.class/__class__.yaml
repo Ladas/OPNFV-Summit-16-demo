@@ -293,10 +293,31 @@ object:
       max_time: 
   - field:
       aetype: state
-      name: EmailOwner
+      name: post7
       display_name: 
       datatype: string
       priority: 15
+      owner: 
+      default_value: 
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing Post7 Customizations')
+      on_exit: update_serviceprovision_status(status => 'Processed Post7 Customizations')
+      on_error: update_serviceprovision_status(status => 'Error Processing Post7 Customizations')(status
+        => 'Error Emailing Owner')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: EmailOwner
+      display_name: 
+      datatype: string
+      priority: 16
       owner: 
       default_value: "/Service/Provisioning/Email/ServiceProvision_complete?event=service_provisioned"
       substitute: true
@@ -316,7 +337,7 @@ object:
       name: Finished
       display_name: 
       datatype: string
-      priority: 16
+      priority: 17
       owner: 
       default_value: "/System/CommonMethods/StateMachineMethods/service_provision_finished"
       substitute: true
