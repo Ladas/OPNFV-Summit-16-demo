@@ -1,0 +1,20 @@
+---
+object_type: instance
+version: 1.0
+object:
+  attributes:
+    display_name: 
+    name: run_ansible_job
+    inherits: 
+    description: 
+  fields:
+  - post1:
+      value: "/NetworkServices/Methods/run_ansible_jobs"
+      on_entry: update_serviceprovision_status(status => 'Processing run_ansible_jobs')
+      on_exit: update_serviceprovision_status(status => 'Processed run_ansible_jobs')
+      on_error: update_serviceprovision_status(status => 'Error processing run_ansible_jobs')
+  - post2:
+      value: "/NetworkServices/Methods/check_ansible_jobs_finished "
+      on_entry: update_serviceprovision_status(status => 'Processing check_ansible_jobs_finished')
+      on_exit: update_serviceprovision_status(status => 'Processed check_ansible_jobs_finished')
+      on_error: update_serviceprovision_status(status => 'Error processing check_ansible_jobs_finished')

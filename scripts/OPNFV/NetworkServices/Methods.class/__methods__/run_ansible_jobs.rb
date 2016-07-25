@@ -1,6 +1,11 @@
-def launch_ansible_job(configuration_manager, network_service, parent_service, template, vms, properties)
+def launch_ansible_job(configuration_manager, network_service, parent_service, template, vms, properties, ansible_job_reconfiguration_service)
   orchestration_service = $evm.vmdb('ServiceAnsibleTower').create(
     :name => "Ansible job - #{template.name}")
+  
+  # Store the ansible service ids, so we can wait for them in next step
+  ansible_service_ids = $evm.get_state_var(:ansible_service_ids)
+  ansible_service_ids << orchestration_service.id
+  $evm.set_state_var(:ansible_service_ids, ansible_service_ids)
   
   $evm.log(:info, "Running Ansible Tower template on VM of the type: #{vms.first.type}")
   if vms.first.type == "ManageIQ::Providers::Amazon::CloudManager::Vm"
@@ -12,20 +17,22 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
   end
   $evm.log(:info, "Running Ansible Tower template: #{template.name} on VMs: #{vm_names} with properties: #{properties}")
   
+  orchestration_service.custom_set(:extra_vars, JSON.pretty_generate(properties))
+  orchestration_service.custom_set(:limit, vm_names)
+  
   orchestration_service.job_template          = template
   orchestration_service.configuration_manager = configuration_manager
   orchestration_service.job_options           = {:limit => vm_names, :extra_vars => properties}
   orchestration_service.display               = true
-  orchestration_service.parent_service        = parent_service
+  if ansible_job_reconfiguration_service
+    orchestration_service.parent_service = ansible_job_reconfiguration_service
+    ansible_job_reconfiguration_service.parent_service = parent_service
+  else
+    orchestration_service.parent_service = parent_service
+  end
+  
   orchestration_service.launch_job 
 end
-
-def get_vpn_server_ip(parent_service)
-  # For now, our AWS VM will be the vpn server
-  vm = parent_service.direct_service_children.collect(&:vms).flatten.detect { |x| x.type == "ManageIQ::Providers::Amazon::CloudManager::Vm" }
-  $evm.log(:info, "Finding VPN server VM: #{vm.try(:name)}")
-  vm.floating_ips.detect { |x| x.network_port.cloud_subnets.detect { |subnet| subnet.name == 'CloudExternal' }}.try(:address)
-end  
 
 def cps_for_id(network_service, id)
   # Returns list of capabilities for each VNF, e.g.: ["CloudExternal", "VL1", "VL2", "net_mgmt"]
@@ -41,17 +48,28 @@ end
 require 'ipaddr'
 begin
   nsd = $evm.get_state_var(:nsd)
+  $evm.set_state_var(:ansible_service_ids, [])
+  
   $evm.log("info", "Listing nsd #{nsd}")
   $evm.log("info", "Listing Root Object Attributes:")
   $evm.root.attributes.sort.each { |k, v| $evm.log("info", "\t#{k}: #{v}") }
   $evm.log("info", "===========================================")
+  network_service = nil
+  ansible_job_reconfiguration_service = nil
   
-  parent_service = $evm.root['service_template_provision_task'].destination
-  parent_service.name = $evm.root.attributes['dialog_service_name']
+  if !$evm.root.attributes['dialog_ordered_network_service'].blank?
+    ansible_job_reconfiguration_service = $evm.root['service_template_provision_task'].destination
+    ansible_job_reconfiguration_service.name = $evm.root.attributes['dialog_ansible_job_label']
+    
+    parent_service = $evm.vmdb(:service, $evm.root.attributes['dialog_ordered_network_service'])
+    network_service = $evm.vmdb(:service, parent_service.get_dialog_option('dialog_network_service'))
+    raise "Can't find network service with id #{parent_service.get_dialog_option('dialog_network_service')}" if network_service.nil?
+  else
+    parent_service = $evm.root['service_template_provision_task'].destination
+    parent_service.name = $evm.root.attributes['dialog_service_name']
   
-  network_service = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
-  
-  vpn_server_ip = get_vpn_server_ip(parent_service)
+    network_service = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
+  end
   
   cluster = {}
   subnets = {}
@@ -93,23 +111,37 @@ begin
     # under properties
     json_properties = vnf_service.custom_get('properties') || '{}'
     properties = JSON.parse(json_properties) 
-    properties['vpn_server_ip'] = vpn_server_ip
-    properties['cluster']       = cluster
-    properties['subnets']       = subnets
+    properties['cluster'] = cluster
+    properties['subnets'] = subnets
+    
+    if !$evm.root.attributes['dialog_extra_variables'].blank?
+      extra_variables = JSON.parse($evm.root.attributes['dialog_extra_variables'])
+      properties.merge!(extra_variables)
+    end  
     
     ansible_manager_name = properties['ansible_vim_id']
-    template_name        = properties['ansible_template_name']
+    if $evm.root.attributes['dialog_ansible_template_name']
+      template_name = $evm.root.attributes['dialog_ansible_template_name']
+    else
+      template_name = properties['ansible_template_name']
+    end  
     
     next if !template_name || !ansible_manager_name
     
-    network_service       = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
     configuration_manager = $evm.vmdb('ManageIQ_Providers_AnsibleTower_ConfigurationManager').find_by_name(ansible_manager_name)
     template              = $evm.vmdb('ConfigurationScript').find_by_name(template_name)
     
+    $evm.log("info", "Template #{template.name} not found") unless template
+    $evm.log("info", "Configuration manager #{ansible_manager_name} not found") unless configuration_manager
     next if !template || !configuration_manager
     $evm.log("info", "Found template #{template.name}")
 
-    launch_ansible_job(configuration_manager, network_service, vnf_service, template, vnf_service.vms, properties)
+    skip_vnf = false
+    if $evm.root.attributes['dialog_limited_to_vnf'] && $evm.root.attributes['dialog_limited_to_vnf'] != "!"
+      skip_vnf = $evm.root.attributes['dialog_limited_to_vnf'].to_s != vnf_service.id.to_s
+      $evm.log("info", "Skipping ansible job on #{vnf_service.name}") if skip_vnf
+    end
+    launch_ansible_job(configuration_manager, network_service, vnf_service, template, vnf_service.vms, properties, ansible_job_reconfiguration_service) unless skip_vnf
   end
  
 rescue => err
