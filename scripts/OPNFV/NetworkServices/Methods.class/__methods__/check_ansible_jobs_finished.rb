@@ -32,16 +32,14 @@ end
 begin
   all_services_deployed = true
   error_reasons         = ""
-  parent_service        = $evm.root['service_template_provision_task'].destination
-  parent_service.direct_service_children.each do |vnf_service|
-    vnf_service.direct_service_children.each do |ansible_service|
-      next unless ansible_service.try(:job)
+    
+  $evm.get_state_var(:ansible_service_ids).each do |ansible_service_id|
+    ansible_service = $evm.vmdb(:service, ansible_service_id)
+      
+    service_deployed, service_error_reason = check_job_finished(ansible_service)
 
-      service_deployed, service_error_reason = check_job_finished(ansible_service)
-
-      all_services_deployed = all_services_deployed && service_deployed
-      error_reasons += service_error_reason
-    end  
+    all_services_deployed = all_services_deployed && service_deployed
+    error_reasons += service_error_reason  
   end  
 
   if !error_reasons.blank?
