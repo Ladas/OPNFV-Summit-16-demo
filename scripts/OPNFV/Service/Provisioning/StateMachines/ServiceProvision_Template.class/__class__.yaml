@@ -308,8 +308,7 @@ object:
       condition: 
       on_entry: update_serviceprovision_status(status => 'Processing Post7 Customizations')
       on_exit: update_serviceprovision_status(status => 'Processed Post7 Customizations')
-      on_error: update_serviceprovision_status(status => 'Error Processing Post7 Customizations')(status
-        => 'Error Emailing Owner')
+      on_error: update_serviceprovision_status(status => 'Error Processing Post7 Customizations')
       max_retries: '100'
       max_time: 
   - field:
