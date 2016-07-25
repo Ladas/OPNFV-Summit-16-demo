@@ -1,0 +1,353 @@
+---
+object_type: class
+version: 1.0
+object:
+  attributes:
+    description: Service Provision State Machine
+    display_name: 
+    name: OrderNetworkService
+    type: 
+    inherits: 
+    visibility: 
+    owner: 
+  schema:
+  - field:
+      aetype: state
+      name: pre1
+      display_name: 
+      datatype: string
+      priority: 1
+      owner: 
+      default_value: 
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing Pre1')
+      on_exit: update_serviceprovision_status(status => 'Processed Pre1')
+      on_error: update_serviceprovision_status(status => 'Error Processing Pre1')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: pre2
+      display_name: 
+      datatype: string
+      priority: 2
+      owner: 
+      default_value: 
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing Pre2')
+      on_exit: update_serviceprovision_status(status => 'Processed Pre2')
+      on_error: update_serviceprovision_status(status => 'Error Processing Pre2')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: pre3
+      display_name: 
+      datatype: string
+      priority: 3
+      owner: 
+      default_value: 
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing Pre3')
+      on_exit: update_serviceprovision_status(status => 'Processed Pre3')
+      on_error: update_serviceprovision_status(status => 'Error Processing Pre3')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: pre4
+      display_name: 
+      datatype: string
+      priority: 4
+      owner: 
+      default_value: 
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing Pre4')
+      on_exit: update_serviceprovision_status(status => 'Processed Pre4')
+      on_error: update_serviceprovision_status(status => 'Error Processing Pre4')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: pre5
+      display_name: 
+      datatype: string
+      priority: 5
+      owner: 
+      default_value: 
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing Pre5')
+      on_exit: update_serviceprovision_status(status => 'Processed Pre5')
+      on_error: update_serviceprovision_status(status => 'Error Processing Pre5')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: configurechilddialog
+      display_name: 
+      datatype: string
+      priority: 6
+      owner: 
+      default_value: "#/Service/Provisioning/StateMachines/Methods/ConfigureChildDialog"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: 
+      on_exit: 
+      on_error: 
+      max_retries: 
+      max_time: 
+  - field:
+      aetype: state
+      name: provision
+      display_name: 
+      datatype: string
+      priority: 7
+      owner: 
+      default_value: "/Service/Provisioning/StateMachines/Methods/Provision"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Creating Service')
+      on_exit: update_serviceprovision_status(status => 'Creating Service')
+      on_error: update_serviceprovision_status(status => 'Error Creating Service')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: checkprovisioned
+      display_name: 
+      datatype: string
+      priority: 8
+      owner: 
+      default_value: "/Service/Provisioning/StateMachines/Methods/CheckProvisioned"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: 
+      on_exit: update_serviceprovision_status(status => 'Creating Service')
+      on_error: update_serviceprovision_status(status => '${/#ae_reason}')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: create_networks_and_subnets
+      display_name: 
+      datatype: string
+      priority: 9
+      owner: 
+      default_value: "/NetworkServices/Methods/create_networks_and_subnets"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing create_networks_and_subnets')
+      on_exit: update_serviceprovision_status(status => 'Processed create_networks_and_subnets')
+      on_error: update_serviceprovision_status(status => 'Error Processing create_networks_and_subnets')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: deploy_vnfs
+      display_name: 
+      datatype: string
+      priority: 10
+      owner: 
+      default_value: "/NetworkServices/Methods/deploy_vnfs"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing deploy_vnfs')
+      on_exit: update_serviceprovision_status(status => 'Processed deploy_vnfs')
+      on_error: update_serviceprovision_status(status => 'Error Processing deploy_vnfs')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: deploy_cfns
+      display_name: 
+      datatype: string
+      priority: 11
+      owner: 
+      default_value: "/NetworkServices/Methods/deploy_cfns"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing deploy_cfns')
+      on_exit: update_serviceprovision_status(status => 'Processed deploy_cfns')
+      on_error: update_serviceprovision_status(status => 'Error Processing deploy_cfns')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: check_services_provisioned
+      display_name: 
+      datatype: string
+      priority: 12
+      owner: 
+      default_value: "/NetworkServices/Methods/check_services_provisioned"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing check_services_provisioned')
+      on_exit: update_serviceprovision_status(status => 'Processed check_services_provisioned')
+      on_error: update_serviceprovision_status(status => 'Error Processing check_services_provisioned')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: wait_for_providers_to_refresh
+      display_name: 
+      datatype: string
+      priority: 13
+      owner: 
+      default_value: "/NetworkServices/Methods/wait_for_providers_to_refresh"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing wait_for_providers_to_refresh')
+      on_exit: update_serviceprovision_status(status => 'Processed wait_for_providers_to_refresh')
+      on_error: update_serviceprovision_status(status => 'Error Processing wait_for_providers_to_refresh')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: run_ansible_jobs
+      display_name: 
+      datatype: string
+      priority: 14
+      owner: 
+      default_value: "/NetworkServices/Methods/run_ansible_jobs"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing run_ansible_jobs')
+      on_exit: update_serviceprovision_status(status => 'Processed run_ansible_jobs')
+      on_error: update_serviceprovision_status(status => 'Error Processing run_ansible_jobs')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: check_ansible_jobs_finished
+      display_name: 
+      datatype: string
+      priority: 15
+      owner: 
+      default_value: "/NetworkServices/Methods/check_ansible_jobs_finished"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Processing check_ansible_jobs_finished')
+      on_exit: update_serviceprovision_status(status => 'Processed check_ansible_jobs_finished')
+      on_error: update_serviceprovision_status(status => 'Error Processing check_ansible_jobs_finished')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: EmailOwner
+      display_name: 
+      datatype: string
+      priority: 16
+      owner: 
+      default_value: "/Service/Provisioning/Email/ServiceProvision_complete?event=service_provisioned"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: update_serviceprovision_status(status => 'Emailing Owner')
+      on_exit: update_serviceprovision_status(status => 'Emailed Owner')
+      on_error: update_serviceprovision_status(status => 'Error Emailing Owner')
+      max_retries: '100'
+      max_time: 
+  - field:
+      aetype: state
+      name: Finished
+      display_name: 
+      datatype: string
+      priority: 17
+      owner: 
+      default_value: "/System/CommonMethods/StateMachineMethods/service_provision_finished"
+      substitute: true
+      message: create
+      visibility: 
+      collect: 
+      scope: 
+      description: 
+      condition: 
+      on_entry: 
+      on_exit: 
+      on_error: 
+      max_retries: '100'
+      max_time: 
