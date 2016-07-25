@@ -7,7 +7,7 @@ begin
   parent_service = $evm.vmdb(:service, $evm.root.attributes['dialog_vnf_type'])
   raise "Can't find service with id #{$evm.root.attributes['dialog_vnf_type']}" if parent_service.nil?
   template_service.parent_service = parent_service
-  template_service.custom_set('vnfd_template', JSON.dump(YAML.load($evm.root.attributes['dialog_vnfd_content'])))
+  template_service.custom_set('vnfd_template', JSON.pretty_generate(YAML.load($evm.root.attributes['dialog_vnfd_content'])))
 
 rescue => err
   $evm.log(:error, "[#{err}]\n#{err.backtrace.join("\n")}") 
