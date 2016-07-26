@@ -1,6 +1,12 @@
-def launch_ansible_job(configuration_manager, network_service, parent_service, template, vms, properties, ansible_job_reconfiguration_service)
+def launch_ansible_job(configuration_manager, network_service, parent_service, template, vms, properties)
+  if !$evm.root.attributes['dialog_ansible_job_label'].blank?
+    job_name = "#{Time.now.utc} #{$evm.root.attributes['dialog_ansible_job_label']} (#{template.name})"
+  else
+    job_name = "#{Time.now.utc} #{template.name}"
+  end  
+  
   orchestration_service = $evm.vmdb('ServiceAnsibleTower').create(
-    :name => "Ansible job - #{template.name}")
+    :name => job_name)
   
   # Store the ansible service ids, so we can wait for them in next step
   ansible_service_ids = $evm.get_state_var(:ansible_service_ids)
@@ -24,13 +30,7 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
   orchestration_service.configuration_manager = configuration_manager
   orchestration_service.job_options           = {:limit => vm_names, :extra_vars => properties}
   orchestration_service.display               = true
-  if ansible_job_reconfiguration_service
-    orchestration_service.parent_service = ansible_job_reconfiguration_service
-    ansible_job_reconfiguration_service.parent_service = parent_service
-  else
-    orchestration_service.parent_service = parent_service
-  end
-  
+  orchestration_service.parent_service        = parent_service
   orchestration_service.launch_job 
 end
 
@@ -43,41 +43,16 @@ def cps_for_id(network_service, id)
     end
   end
   cps
-end  
+end
 
-require 'ipaddr'
-begin
-  nsd = $evm.get_state_var(:nsd)
-  $evm.set_state_var(:ansible_service_ids, [])
-  
-  $evm.log("info", "Listing nsd #{nsd}")
-  $evm.log("info", "Listing Root Object Attributes:")
-  $evm.root.attributes.sort.each { |k, v| $evm.log("info", "\t#{k}: #{v}") }
-  $evm.log("info", "===========================================")
-  network_service = nil
-  ansible_job_reconfiguration_service = nil
-  
-  if !$evm.root.attributes['dialog_ordered_network_service'].blank?
-    ansible_job_reconfiguration_service = $evm.root['service_template_provision_task'].destination
-    ansible_job_reconfiguration_service.name = $evm.root.attributes['dialog_ansible_job_label']
-    
-    parent_service = $evm.vmdb(:service, $evm.root.attributes['dialog_ordered_network_service'])
-    network_service = $evm.vmdb(:service, parent_service.get_dialog_option('dialog_network_service'))
-    raise "Can't find network service with id #{parent_service.get_dialog_option('dialog_network_service')}" if network_service.nil?
-  else
-    parent_service = $evm.root['service_template_provision_task'].destination
-    parent_service.name = $evm.root.attributes['dialog_service_name']
-  
-    network_service = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
-  end
-  
+def get_cluster_info(parent_service, network_service)
   cluster = {}
   subnets = {}
   parent_service.direct_service_children.each do |vnf_service|
     json_properties = vnf_service.custom_get('properties') || '{}'
-    properties = JSON.parse(json_properties)
-    id = properties['id']
-    vim_id = properties['vim_id']
+    properties      = JSON.parse(json_properties)
+    id              = properties['id']
+    vim_id          = properties['vim_id']
     next unless id
     
     cluster[id] = {}
@@ -105,6 +80,39 @@ begin
       end
     end
   end
+  
+  return cluster, subnets
+end  
+
+require 'ipaddr'
+begin
+  nsd = $evm.get_state_var(:nsd)
+  $evm.set_state_var(:ansible_service_ids, [])
+  
+  $evm.log("info", "Listing nsd #{nsd}")
+  $evm.log("info", "Listing Root Object Attributes:")
+  $evm.root.attributes.sort.each { |k, v| $evm.log("info", "\t#{k}: #{v}") }
+  $evm.log("info", "===========================================")
+  network_service = nil
+  
+  if !$evm.root.attributes['dialog_ordered_network_service'].blank?
+    parent_service = $evm.vmdb(:service, $evm.root.attributes['dialog_ordered_network_service'])
+    network_service = $evm.vmdb(:service, parent_service.get_dialog_option('dialog_network_service'))
+    
+    ansible_job_reconfiguration_service = $evm.root['service_template_provision_task'].destination
+    ansible_job_reconfiguration_service.name = $evm.root.attributes['dialog_ansible_job_label']
+    ansible_job_reconfiguration_service.display = false
+    ansible_job_reconfiguration_service.parent_service = parent_service
+   
+    raise "Can't find network service with id #{parent_service.get_dialog_option('dialog_network_service')}" if network_service.nil?
+  else
+    parent_service = $evm.root['service_template_provision_task'].destination
+    parent_service.name = $evm.root.attributes['dialog_service_name']
+  
+    network_service = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
+  end
+  
+  cluster, subnets = get_cluster_info(parent_service, network_service)
   
   parent_service.direct_service_children.each do |vnf_service|
     # There can be more types of services, we are interested in services with ansible job name defined
@@ -137,11 +145,11 @@ begin
     $evm.log("info", "Found template #{template.name}")
 
     skip_vnf = false
-    if $evm.root.attributes['dialog_limited_to_vnf'] && $evm.root.attributes['dialog_limited_to_vnf'] != "!"
+    if !$evm.root.attributes['dialog_limited_to_vnf'].blank? && $evm.root.attributes['dialog_limited_to_vnf'] != "!"
       skip_vnf = $evm.root.attributes['dialog_limited_to_vnf'].to_s != vnf_service.id.to_s
       $evm.log("info", "Skipping ansible job on #{vnf_service.name}") if skip_vnf
     end
-    launch_ansible_job(configuration_manager, network_service, vnf_service, template, vnf_service.vms, properties, ansible_job_reconfiguration_service) unless skip_vnf
+    launch_ansible_job(configuration_manager, network_service, vnf_service, template, vnf_service.vms, properties) unless skip_vnf
   end
  
 rescue => err
