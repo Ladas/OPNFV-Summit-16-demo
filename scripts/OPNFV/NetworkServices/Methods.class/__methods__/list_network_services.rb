@@ -1,5 +1,5 @@
 values_hash = {}
-values_hash['!'] = '-- select service from list --' 
+values_hash[''] = '-- select service from list --' 
 
 tag = "/managed/service_type/network_service"
 services = $evm.vmdb(:service).find_tagged_with(:all => tag, :ns => "*")

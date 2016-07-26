@@ -1,5 +1,5 @@
 values_hash = {}
-values_hash['!'] = '-- select ordered service from list --' 
+values_hash[''] = '-- select ordered service from list --' 
 
 network_service_id = $evm.root['dialog_parent_network_service']
 $evm.log(:info, "Parent Network Service ID for ordered service: #{network_service_id}")

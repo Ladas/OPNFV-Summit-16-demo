@@ -1,5 +1,5 @@
 values_hash = {}
-values_hash['!'] = '-- select ansible job template from list --' 
+values_hash[''] = '-- select ansible job template from list --' 
 
 network_service_id = $evm.root['dialog_ordered_network_service']
 $evm.log(:info, "Ordered Network Service ID for job template: #{network_service_id}")

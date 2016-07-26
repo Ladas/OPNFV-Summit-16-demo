@@ -1,5 +1,5 @@
 values_hash = {}
-values_hash['!'] = '-- select service from list --' 
+values_hash[''] = '-- select service from list --' 
 
 network_service_id = $evm.root['dialog_network_service']
 unless network_service_id.nil? || network_service_id.empty?
