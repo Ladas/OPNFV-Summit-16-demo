@@ -12,7 +12,7 @@ would be:
     $ vagrant ssh
 
 After installation of ansible tower, 
-    Install tower-cli
+    sudo pip install ansible-tower-cli
     tower-cli config host localhost
     tower-cli config username admin
     tower-cli config password YOUR_PASSWORD_HERE
