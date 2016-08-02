@@ -21,9 +21,9 @@ After installation of ansible tower,
 To use Ansible Tower you need to do roughly the following:
   1. Create Credentials for each environment you need to access
      a. AWS API
-     b. AWS Key Pair
+     b. AWS Key Pair (for cloud router instance deployed in AWS)
      c. OpenStack Admin login (For discovery)
-     d. OpenStack Key Pair 
+     d. OpenStack Key Pair (for cloud router instance deployed in OS)
      e. github account
   2. Create a Project which references the git@github.com:atyronesmith/OPNFV-demo-ansible.git repository
      During each run, Ansible Tower will update from this repo to get the latest Ansible Playbooks
