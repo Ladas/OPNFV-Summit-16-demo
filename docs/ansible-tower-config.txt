@@ -67,6 +67,6 @@ tower-cli project create --name "OPNFV-demo" --description "Project for OPNFV Su
     tower-cli job_template create --name OPNFV-demo-client --description "All clients tasks"  --job-type run --inventory "OS-DEMO-INVENTORY" --project "OPNFV-demo" --playbook cr-vpn-clients.yml --machine-credential "OS-DEMO-KEY-PAIR" 
 
 ### Job Template for server
-    tower-cli --name OPNFV-demo-server --description "All server tasks"  --job-type run --inventory "AWS-DEMO" --project "OPNFV-demo" --playbook cr-vpn-servers.yml --machine-credential "AWS-DEMO-KEY-PAIR" 
+    tower-cli job_template create --name OPNFV-demo-server --description "All server tasks"  --job-type run --inventory "AWS-DEMO" --project "OPNFV-demo" --playbook cr-vpn-servers.yml --machine-credential "AWS-DEMO-KEY-PAIR" 
 
 
