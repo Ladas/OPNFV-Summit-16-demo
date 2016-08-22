@@ -33,14 +33,14 @@ To use Ansible Tower you need to do roughly the following:
   5. The Ansible Tower Job Template created above will be invoked by ManageIQ using the Job Template name specified in the TOSCA NSD file.
 
 ## Add Credentials to Ansible Tower 
-### Add crendential for AWS API
-    tower-cli crendential create --name AWS-DEMO-API --description "AWS API Credentials" --kind aws --username AWS_ACCESS_KEY --password AWS_SECRET_KEY 
+### Add credential for AWS API
+    tower-cli credential create --name AWS-DEMO-API --description "AWS API Credentials" --kind aws --username AWS_ACCESS_KEY --password AWS_SECRET_KEY 
 
 ### Add credential for AWS key pair
-    tower-cli crednetial create --name AWS-DEMO-KEY-PAIR --description "SSH key pair" --kind ssh --cloud false --username opnfv --password "" --ssh-key-data ./ssh/aws-private-key 
+    tower-cli credential create --name AWS-DEMO-KEY-PAIR --description "SSH key pair" --kind ssh --cloud false --username opnfv --password "" --ssh-key-data ./ssh/aws-private-key 
 
 ### Add credential for OpenStack Cloud
-    tower-cli crednetial create --name OS-DEMO-LOGIN --description "OS Login" --kind openstack --cloud true --username admin --password ADMIN_PASSWORD 
+    tower-cli credential create --name OS-DEMO-LOGIN --description "OS Login" --kind openstack --cloud true --username admin --password ADMIN_PASSWORD 
 
 ### Add credential for OpenSTack key pair
     tower-cli credential create --name OS-DEMO-KEY-PAIR --description "SSH key pair" --kind ssh --username opnfv --password "" --ssh-key-data ./ssh/os-private-key 
