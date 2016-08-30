@@ -139,7 +139,7 @@ begin
     configuration_manager = $evm.vmdb('ManageIQ_Providers_AnsibleTower_ConfigurationManager').find_by_name(ansible_manager_name)
     template              = $evm.vmdb('ConfigurationScript').find_by_name(template_name)
     
-    $evm.log("info", "Template #{template.name} not found") unless template
+    $evm.log("info", "Template #{template_name} not found") unless template
     $evm.log("info", "Configuration manager #{ansible_manager_name} not found") unless configuration_manager
     next if !template || !configuration_manager
     $evm.log("info", "Found template #{template.name}")
