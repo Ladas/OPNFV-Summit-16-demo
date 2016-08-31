@@ -60,8 +60,20 @@ def deploy_networks(network_service, parent_service)
     networks_template = get_networks_template(network_service, parent_service)
     networks_orchestration = deploy_networks_stack(network_orchestration_manager, parent_service, networks_template)
   end
+ 
+  if networks_orchestration == nil
+    $evm.log(:warn, "Network orchestration service still missing for #{parent_service.name} networks")
+    $evm.root['ae_result']         = 'retry'
+    $evm.root['ae_retry_interval'] = '5.seconds'
+    exit MIQ_OK
+  end
   
-  if networks_orchestration.orchestration_stack_status[0] == 'transient'
+  if networks_orchestration.orchestration_stack_status[0].include? 'rollback'
+    $evm.log(:error, "Stack for #{parent_service.name} networks failed")
+    exit MIQ_ERROR
+  end 
+ 
+  if networks_orchestration.orchestration_stack_status[0] != 'create_complete'
     $evm.log(:info, "Waiting for networks to spawn: #{networks_orchestration.orchestration_stack_status} (current state)")
     $evm.root['ae_result']         = 'retry'
     $evm.root['ae_retry_interval'] = '5.seconds'
