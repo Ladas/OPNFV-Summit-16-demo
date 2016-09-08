@@ -6,7 +6,7 @@ object:
     name: OPNFV
     description: 
     display_name: 
-    system: false
     priority: 1
     enabled: true
     tenant_id: 1
+    source: user
