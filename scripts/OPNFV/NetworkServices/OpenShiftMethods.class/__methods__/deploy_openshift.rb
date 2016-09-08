@@ -7,11 +7,11 @@ begin
   post_params = {
       "action" => "create",
       "resource" => {
-          "provider_name" => "pleasework2d3d_centos",
-          "provider_type" => "openshiftEnterprise",
+          "provider_name" => "pleasework2d3d_centos_7",
+          "provider_type" => "openshiftOrigin",
           "method_type" => "unmanaged",
           "nodes"=> [{
-              "name" => "54.84.213.105",
+              "name" => "54.197.93.122",
               "roles" => {
                   "node" => true,
                   "master" => true,
@@ -27,7 +27,7 @@ begin
           },
           "ssh_authentication" => {
             "auth_key" => "#{$evm.root['dialog_aws_auth_key']}",
-            "userid" => "ec2-user"
+            "userid" => "root"
           },
           "rhsm_authentication" => {
               "userid" => "#{$evm.root['dialog_rhn_user']}",
