@@ -1,0 +1,964 @@
+---
+- description: 
+  buttons: submit,cancel
+  label: New NFV Service
+  dialog_tabs:
+  - description: 
+    display: edit
+    label: Details
+    display_method: 
+    display_method_options: 
+    position: 0
+    dialog_groups:
+    - description: 
+      display: edit
+      label: Service Details
+      display_method: 
+      display_method_options: 
+      position: 0
+      dialog_fields:
+      - name: service_name
+        description: 
+        type: DialogFieldTextBox
+        data_type: 
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: false
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: Name
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+      - name: service_description
+        description: 
+        type: DialogFieldTextBox
+        data_type: 
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: false
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: Description
+        position: 1
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+      - name: nsd
+        description: 
+        type: DialogFieldTextAreaBox
+        data_type: 
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: false
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: NSD content
+        position: 2
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+- description: 
+  buttons: submit,cancel
+  label: Import VNFD
+  dialog_tabs:
+  - description: 
+    display: edit
+    label: Details
+    display_method: 
+    display_method_options: 
+    position: 0
+    dialog_groups:
+    - description: 
+      display: edit
+      label: Service Details
+      display_method: 
+      display_method_options: 
+      position: 0
+      dialog_fields:
+      - name: network_service
+        description: 
+        type: DialogFieldDropDownList
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: 
+        values:
+        - - ''
+          - "-- select service from list --"
+        - - '1'
+          - NSD latest
+        values_method: 
+        values_method_options: {}
+        options:
+          :sort_by: :value
+        label: Network Service
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: true
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: true
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: NetworkServices
+          ae_class: Methods
+          ae_instance: list_network_services
+          ae_message: 
+          ae_attributes: {}
+      - name: vnf_type
+        description: 
+        type: DialogFieldDropDownList
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: 
+        values:
+        - - ''
+          - "-- select service from list --"
+        values_method: 
+        values_method_options: {}
+        options:
+          :sort_by: :value
+        label: VNF type
+        position: 1
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: true
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: true
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: NetworkServices
+          ae_class: Methods
+          ae_instance: list_vnf_services
+          ae_message: 
+          ae_attributes: {}
+      - name: vnfd_content
+        description: 
+        type: DialogFieldTextAreaBox
+        data_type: 
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: false
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: VNFD content
+        position: 2
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+- description: 
+  buttons: submit,cancel
+  label: Order Network Service
+  dialog_tabs:
+  - description: 
+    display: edit
+    label: Details
+    display_method: 
+    display_method_options: 
+    position: 0
+    dialog_groups:
+    - description: 
+      display: edit
+      label: Service to Order
+      display_method: 
+      display_method_options: 
+      position: 0
+      dialog_fields:
+      - name: network_service
+        description: 
+        type: DialogFieldDropDownList
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: 
+        values:
+        - - ''
+          - "-- select service from list --"
+        - - '1'
+          - NSD latest
+        values_method: 
+        values_method_options: {}
+        options:
+          :sort_by: :value
+        label: Network Service Name
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: true
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: NetworkServices
+          ae_class: Methods
+          ae_instance: list_network_services
+          ae_message: 
+          ae_attributes: {}
+      - name: service_name
+        description: 
+        type: DialogFieldTextBox
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: false
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: Service name
+        position: 1
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+- description: 
+  buttons: submit,cancel
+  label: Run Ansible Job on Ordered Network Service
+  dialog_tabs:
+  - description: 
+    display: edit
+    label: Details
+    display_method: 
+    display_method_options: 
+    position: 0
+    dialog_groups:
+    - description: Describe your changes in 255 character max
+      display: edit
+      label: Label your change
+      display_method: 
+      display_method_options: 
+      position: 0
+      dialog_fields:
+      - name: ansible_job_label
+        description: 
+        type: DialogFieldTextBox
+        data_type: 
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: Label
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+    - description: 
+      display: edit
+      label: Pick Ansible Job Template
+      display_method: 
+      display_method_options: 
+      position: 1
+      dialog_fields:
+      - name: parent_network_service
+        description: 
+        type: DialogFieldDropDownList
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: 
+        values:
+        - - ''
+          - "-- select service from list --"
+        - - '1'
+          - NSD latest
+        values_method: 
+        values_method_options: {}
+        options:
+          :sort_by: :value
+        label: Network Service Name
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: true
+        show_refresh_button: false
+        load_values_on_init: true
+        read_only: false
+        auto_refresh: true
+        trigger_auto_refresh: true
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: NetworkServices
+          ae_class: Methods
+          ae_instance: list_network_services
+          ae_message: 
+          ae_attributes: {}
+      - name: ordered_network_service
+        description: 
+        type: DialogFieldDropDownList
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: 
+        values:
+        - - ''
+          - "-- select ordered service from list --"
+        values_method: 
+        values_method_options: {}
+        options:
+          :sort_by: :value
+        label: Ordered Network Service Name
+        position: 1
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: true
+        show_refresh_button: false
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: true
+        trigger_auto_refresh: true
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: NetworkServices
+          ae_class: Methods
+          ae_instance: list_ordered_network_services
+          ae_message: 
+          ae_attributes: {}
+      - name: ansible_template_name
+        description: 
+        type: DialogFieldDropDownList
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: 
+        values:
+        - - ''
+          - "-- select ansible job template from list --"
+        values_method: 
+        values_method_options: {}
+        options:
+          :sort_by: :value
+        label: Ansible Job Template
+        position: 2
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: true
+        show_refresh_button: false
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: true
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: NetworkServices
+          ae_class: Methods
+          ae_instance: list_ansible_job_templates
+          ae_message: 
+          ae_attributes: {}
+    - description: If not set, Ansible job will run on all VNFs
+      display: edit
+      label: 'Optionally: Limit Ansible Job to one VNF'
+      display_method: 
+      display_method_options: 
+      position: 2
+      dialog_fields:
+      - name: limited_to_vnf
+        description: 
+        type: DialogFieldDropDownList
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: false
+        required_method: 
+        required_method_options: {}
+        default_value: 
+        values:
+        - - ''
+          - "-- select VNF from list --"
+        values_method: 
+        values_method_options: {}
+        options:
+          :sort_by: :value
+        label: VNF
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: true
+        show_refresh_button: false
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: true
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: NetworkServices
+          ae_class: Methods
+          ae_instance: list_ordered_network_service_vnfs
+          ae_message: 
+          ae_attributes: {}
+    - description: must be in JSON format
+      display: edit
+      label: 'Optionally: pass extra variables in JSON format'
+      display_method: 
+      display_method_options: 
+      position: 3
+      dialog_fields:
+      - name: extra_variables
+        description: 
+        type: DialogFieldTextAreaBox
+        data_type: 
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: false
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: Extra variables
+        position: 0
+        validator_type: ''
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+- description: 
+  buttons: submit,cancel
+  label: Deploy OpenShift
+  dialog_tabs:
+  - description: 
+    display: edit
+    label: Deploy OpenShift
+    display_method: 
+    display_method_options: 
+    position: 0
+    dialog_groups:
+    - description: 
+      display: edit
+      label: RHN info
+      display_method: 
+      display_method_options: 
+      position: 0
+      dialog_fields:
+      - name: rhn_user
+        description: 
+        type: DialogFieldTextBox
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: rhn_user
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+      - name: rhn_password
+        description: 
+        type: DialogFieldTextBox
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: rhn_password
+        position: 1
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+      - name: aws_auth_key
+        description: 
+        type: DialogFieldTextAreaBox
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: aws_auth_key
+        position: 2
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+- description: 
+  buttons: submit,cancel
+  label: Deploy OpenShift App
+  dialog_tabs:
+  - description: 
+    display: edit
+    label: Deploy OpenShift App
+    display_method: 
+    display_method_options: 
+    position: 0
+    dialog_groups:
+    - description: 
+      display: edit
+      label: General
+      display_method: 
+      display_method_options: 
+      position: 0
+      dialog_fields:
+      - name: openshift_project_name
+        description: 
+        type: DialogFieldTextBox
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: Project name
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+      - name: openshift_project_display_name
+        description: 
+        type: DialogFieldTextBox
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: Project Display Name
+        position: 1
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
+    - description: 
+      display: edit
+      label: Pick an OpenShift Manager
+      display_method: 
+      display_method_options: 
+      position: 1
+      dialog_fields:
+      - name: openshift_manager
+        description: 
+        type: DialogFieldDropDownList
+        data_type: string
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: 
+        values:
+        - - "!"
+          - "-- select OpenShift manager from list --"
+        values_method: 
+        values_method_options: {}
+        options:
+          :sort_by: :value
+        label: OpenShift Manager
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: true
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: true
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: NetworkServices
+          ae_class: OpenShiftAppDeploymentMethods
+          ae_instance: list_openshift_managers
+          ae_message: 
+          ae_attributes: {}
+    - description: 
+      display: edit
+      label: Paste a template in a JSON format
+      display_method: 
+      display_method_options: 
+      position: 2
+      dialog_fields:
+      - name: openshift_template
+        description: 
+        type: DialogFieldTextAreaBox
+        data_type: 
+        notes: 
+        notes_display: 
+        display: edit
+        display_method: 
+        display_method_options: {}
+        required: true
+        required_method: 
+        required_method_options: {}
+        default_value: ''
+        values: 
+        values_method: 
+        values_method_options: {}
+        options:
+          :protected: false
+        label: Template
+        position: 0
+        validator_type: 
+        validator_rule: 
+        reconfigurable: 
+        dynamic: false
+        show_refresh_button: 
+        load_values_on_init: 
+        read_only: false
+        auto_refresh: 
+        trigger_auto_refresh: 
+        visible: true
+        resource_action:
+          action: 
+          resource_type: DialogField
+          ae_namespace: 
+          ae_class: 
+          ae_instance: 
+          ae_message: 
+          ae_attributes: {}
