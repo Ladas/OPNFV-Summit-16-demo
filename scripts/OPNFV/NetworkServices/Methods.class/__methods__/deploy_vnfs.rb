@@ -117,14 +117,16 @@ def get_template(orchestration_manager, network_service, parent_service, vnf_ser
               :content      => YAML.dump(template_content)}
 
   url     = 'http://localhost:3000/api/orchestration_templates'
-  options = {:method  => :post,
-             :url     => url,
-             :payload => { :action => "create", :resource => resource },
-             :headers => {'X-Auth-Token' => MIQ_API_TOKEN}}
+  options = {:method     => :post,
+             :url        => url,
+             :verify_ssl => false,
+             :payload    => {"action"   => "create",
+                             "resource" => resource}.to_json,
+             :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                             :accept        => :json}}
   $evm.log("info", "LADASOR opts #{options}")
 
-  body = RestClient::Request.new(options).execute.body
-  body = JSON.parse(body)
+  body = JSON.parse(RestClient::Request.execute(options))
   $evm.log("info", "LADASOR resp #{body}")
 
   $evm.vmdb('orchestration_template_vnfd', body["results"].first["id"])
