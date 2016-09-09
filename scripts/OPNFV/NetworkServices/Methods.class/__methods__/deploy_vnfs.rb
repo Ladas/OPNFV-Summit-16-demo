@@ -108,12 +108,26 @@ def get_template(orchestration_manager, network_service, parent_service, vnf_ser
     
   template_content['topology_template']['node_templates'].merge!(virtual_links)
   unused_cps.each { |x| template_content['topology_template']['node_templates'].delete(x) }
-      
-  $evm.vmdb('orchestration_template_vnfd').create(
-    :name      => vnf_template_name, 
-    :orderable => true, 
-    :ems_id    => orchestration_manager.id, 
-    :content   => YAML.dump(template_content))
+
+  resource = {:name         => vnf_template_name,
+              :type         => "OrchestrationTemplateVnfd",
+              :orderable    => true,
+              :remote_proxy => true,
+              :ems_id       => orchestration_manager.id,
+              :content      => YAML.dump(template_content)}
+
+  url     = 'http://localhost:3000/api/orchestration_templates'
+  options = {:method  => :post,
+             :url     => url,
+             :payload => { :action => "create", :resource => resource },
+             :headers => {'X-Auth-Token' => MIQ_API_TOKEN}}
+  $evm.log("info", "LADASOR opts #{options}")
+
+  body = RestClient::Request.new(options).execute.body
+  body = JSON.parse(body)
+  $evm.log("info", "LADASOR resp #{body}")
+
+  $evm.vmdb('orchestration_template_vnfd', body["results"].first["id"])
 end
 
 def deploy_vnfs(network_service, parent_service)
