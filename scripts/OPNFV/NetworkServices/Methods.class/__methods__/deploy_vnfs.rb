@@ -164,6 +164,8 @@ def deploy_vnf_stack(orchestration_manager, network_service, parent_service, vnf
 end  
 
 begin
+  require 'rest-client'
+
   nsd = $evm.get_state_var(:nsd)
   $evm.log("info", "Listing nsd #{nsd}")
   $evm.log("info", "Listing Root Object Attributes:")
