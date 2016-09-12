@@ -197,17 +197,29 @@ def deploy_amazon_stack(orchestration_manager, parent_service, vnf_service)
   name = "#{parent_service.name} #{vnf_service.name} #{parent_service.id}"
   template = create_template(name,nsd_properties,nsd_requirements)
 
-  $evm.log("info", "Deploying CFN template #{name}")
-  orchestration_service = $evm.vmdb('ServiceOrchestration').create(
-    :name => "#{parent_service.name} #{vnf_service.name}")
+  resource = {:name                   => "#{parent_service.name} #{vnf_service.name}",
+              :type                   => "ServiceOrchestration",
+              :orchestration_template => {:id => template.id},
+              :orchestration_manager  => {:id => orchestration_manager.id},
+              :parent_service         => {:id => parent_service.id},
+              :stack_name             => name.gsub("\s", "-").gsub("_", "-"),
+              :stack_options          => {},
+              :display                => true}
 
+  url     = "http://localhost:3000/api/services"
+  options = {:method     => :post,
+             :url        => url,
+             :verify_ssl => false,
+             :payload    => {"action"   => "create",
+                             "resource" => resource}.to_json,
+             :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                             :accept        => :json}}
+  $evm.log("info", "Creating CFN service #{options}")
+
+  body = JSON.parse(RestClient::Request.execute(options))
+
+  orchestration_service = $evm.vmdb('service', body["results"].first["id"])
   orchestration_service.custom_set('properties', nsd_properties.to_json)
-  orchestration_service.stack_name             = name.gsub("\s", "-").gsub("_", "-")
-  orchestration_service.orchestration_template = template
-  orchestration_service.orchestration_manager  = orchestration_manager
-  orchestration_service.stack_options          = {}
-  orchestration_service.display                = true
-  orchestration_service.parent_service         = parent_service
   orchestration_service.deploy_orchestration_stack
 end
 
