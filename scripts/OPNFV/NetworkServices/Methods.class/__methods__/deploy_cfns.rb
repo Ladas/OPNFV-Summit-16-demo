@@ -164,10 +164,25 @@ def create_template(name,nsd_properties,nsd_requirements)
   
   $evm.log(:info ,"nic array==> #{nic}")
   template_content["Resources"].merge!(instance("Ec2Instance", nic, key_name, image.ems_ref,availability_zone,instance_type))
-  $evm.vmdb('orchestration_template_cfn').create(
-    :name      => name,
-    :orderable => true,
-    :content   => JSON.pretty_generate(template_content))
+
+  resource = {:name      => name,
+              :type      => "OrchestrationTemplateCfn",
+              :orderable => true,
+              :content   => JSON.pretty_generate(template_content)}
+
+  url     = "http://localhost:3000/api/orchestration_templates"
+  options = {:method     => :post,
+             :url        => url,
+             :verify_ssl => false,
+             :payload    => {"action"   => "create",
+                             "resource" => resource}.to_json,
+             :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                             :accept        => :json}}
+  $evm.log("info", "Creating CFN template #{options}")
+
+  body = JSON.parse(RestClient::Request.execute(options))
+
+  $evm.vmdb('orchestration_template_cfn', body["results"].first["id"])
 end
 
 def deploy_amazon_stack(orchestration_manager, parent_service, vnf_service)
