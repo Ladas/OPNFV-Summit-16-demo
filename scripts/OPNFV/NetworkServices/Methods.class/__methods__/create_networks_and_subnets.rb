@@ -134,6 +134,8 @@ def deploy_networks_stack(orchestration_manager, parent_service, template)
 end  
 
 begin
+  require 'rest-client'
+
   nsd = $evm.get_state_var(:nsd)
   $evm.log("info", "Listing nsd #{nsd}")
   $evm.log("info", "Listing Root Object Attributes:")
