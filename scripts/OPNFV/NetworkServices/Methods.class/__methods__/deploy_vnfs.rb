@@ -14,7 +14,6 @@ def get_template_contents(network_service)
 end  
 
 def get_template(orchestration_manager, network_service, parent_service, vnf_service)
-  templates = {}
   # Load our general VNFDs per type
   template_contents = get_template_contents(network_service)
   
@@ -151,16 +150,40 @@ def deploy_vnf_stack(orchestration_manager, network_service, parent_service, vnf
   
   params = params.to_json
   
-  orchestration_service = $evm.vmdb('ServiceOrchestration').create(
-    :name => "#{parent_service.name} #{vnf_service.name}")
-  
+  # orchestration_service = $evm.vmdb('ServiceOrchestration').create(
+  #   :name => "#{parent_service.name} #{vnf_service.name}")
+  #
+  # orchestration_service.custom_set('properties', params)
+  # orchestration_service.stack_name             = "#{parent_service.name} #{vnf_service.name} #{parent_service.id}"
+  # orchestration_service.orchestration_template = template
+  # orchestration_service.orchestration_manager  = orchestration_manager
+  # orchestration_service.stack_options          = {:attributes => {:param_values => params}}
+  # orchestration_service.display                = true
+  # orchestration_service.parent_service         = parent_service
+
+  resource = {:name                   => "#{parent_service.name} #{vnf_service.name}",
+              :type                   => "ServiceOrchestration",
+              :orchestration_template => {:id => template.id},
+              :orchestration_manager  => {:id => orchestration_manager.id},
+              :parent_service         => {:id => parent_service.id},
+              :stack_name             => "#{parent_service.name} #{vnf_service.name} #{parent_service.id}",
+              :stack_options          => {:attributes => {:param_values => params}},
+              :display                => true}
+
+  url     = "http://localhost:3000/api/services"
+  options = {:method     => :post,
+             :url        => url,
+             :verify_ssl => false,
+             :payload    => {"action"   => "create",
+                             "resource" => resource}.to_json,
+             :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                             :accept        => :json}}
+  $evm.log("info", "Creating Vnf service #{options}")
+
+  body = JSON.parse(RestClient::Request.execute(options))
+
+  orchestration_service = $evm.vmdb('service', body["results"].first["id"])
   orchestration_service.custom_set('properties', params)
-  orchestration_service.stack_name             = "#{parent_service.name} #{vnf_service.name} #{parent_service.id}"
-  orchestration_service.orchestration_template = template
-  orchestration_service.orchestration_manager  = orchestration_manager
-  orchestration_service.stack_options          = {:attributes => {:param_values => params}}
-  orchestration_service.display                = true
-  orchestration_service.parent_service         = parent_service
   orchestration_service.deploy_orchestration_stack 
 end  
 
