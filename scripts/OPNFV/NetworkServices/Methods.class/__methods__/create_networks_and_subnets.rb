@@ -46,12 +46,25 @@ def get_networks_template(network_service, parent_service)
   end
   
   vnf_networks_template_name = "#{parent_service.name} networks #{parent_service.id}"
-  
-  template = $evm.vmdb('orchestration_template_hot').create(
-    :name      => vnf_networks_template_name, 
-      :orderable => true, 
-      :content   => YAML.dump(template_content))
-  template
+
+  resource = {:name      => vnf_networks_template_name,
+              :type      => "OrchestrationTemplateHot",
+              :orderable => true,
+              :content   => YAML.dump(template_content)}
+
+  url     = "http://localhost:3000/api/orchestration_templates"
+  options = {:method     => :post,
+             :url        => url,
+             :verify_ssl => false,
+             :payload    => {"action"   => "create",
+                             "resource" => resource}.to_json,
+             :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                             :accept        => :json}}
+  $evm.log("info", "Creating HOT template #{options}")
+
+  body = JSON.parse(RestClient::Request.execute(options))
+
+  $evm.vmdb('orchestration_template_hot', body["results"].first["id"])
 end
 
 def deploy_networks(network_service, parent_service)
