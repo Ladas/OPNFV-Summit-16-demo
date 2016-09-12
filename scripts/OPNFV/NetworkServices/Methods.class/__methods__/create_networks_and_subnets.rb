@@ -41,6 +41,10 @@ def get_networks_template(network_service, parent_service)
     template_content['resources'][subnet_name]['type'] = 'OS::Neutron::Subnet'
   end
   
+  if template_content['resources'].length == 0
+    return nil
+  end
+  
   vnf_networks_template_name = "#{parent_service.name} networks #{parent_service.id}"
   
   template = $evm.vmdb('orchestration_template_hot').create(
@@ -58,6 +62,13 @@ def deploy_networks(network_service, parent_service)
   
   if networks_orchestration == nil
     networks_template = get_networks_template(network_service, parent_service)
+    
+    if networks_template == nil
+      # No networks to create, so we're done here
+      $evm.log(:info, "No networks require creation for #{parent_service.name} networks")
+      exit MIQ_OK
+    end
+    
     networks_orchestration = deploy_networks_stack(network_orchestration_manager, parent_service, networks_template)
   end
  
