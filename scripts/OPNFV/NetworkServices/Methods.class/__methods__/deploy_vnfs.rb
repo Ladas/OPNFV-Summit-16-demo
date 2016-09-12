@@ -149,17 +149,6 @@ def deploy_vnf_stack(orchestration_manager, network_service, parent_service, vnf
   params['type'] = vnf_service.custom_get('type')
   
   params = params.to_json
-  
-  # orchestration_service = $evm.vmdb('ServiceOrchestration').create(
-  #   :name => "#{parent_service.name} #{vnf_service.name}")
-  #
-  # orchestration_service.custom_set('properties', params)
-  # orchestration_service.stack_name             = "#{parent_service.name} #{vnf_service.name} #{parent_service.id}"
-  # orchestration_service.orchestration_template = template
-  # orchestration_service.orchestration_manager  = orchestration_manager
-  # orchestration_service.stack_options          = {:attributes => {:param_values => params}}
-  # orchestration_service.display                = true
-  # orchestration_service.parent_service         = parent_service
 
   resource = {:name                   => "#{parent_service.name} #{vnf_service.name}",
               :type                   => "ServiceOrchestration",
