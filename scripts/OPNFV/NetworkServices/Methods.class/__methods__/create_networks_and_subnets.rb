@@ -106,17 +106,29 @@ def deploy_networks(network_service, parent_service)
 end
 
 def deploy_networks_stack(orchestration_manager, parent_service, template)
+  resource = {:name                   => "#{parent_service.name} networks",
+              :type                   => "ServiceOrchestration",
+              :orchestration_template => {:id => template.id},
+              :orchestration_manager  => {:id => orchestration_manager.id},
+              :parent_service         => {:id => parent_service.id},
+              :stack_name             => "#{parent_service.name}_#{$evm.root['service_template_provision_task_id']}_networks",
+              :stack_options          => {:attributes => {}},
+              :display                => true}
 
-  orchestration_service = $evm.vmdb('ServiceOrchestration').create(
-    :name => "#{parent_service.name} networks")
+  url     = "http://localhost:3000/api/services"
+  options = {:method     => :post,
+             :url        => url,
+             :verify_ssl => false,
+             :payload    => {"action"   => "create",
+                             "resource" => resource}.to_json,
+             :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                             :accept        => :json}}
+  $evm.log("info", "Creating CFN service #{options}")
 
-  orchestration_service.stack_name             = "#{parent_service.name}_#{$evm.root['service_template_provision_task_id']}_networks"
-  orchestration_service.orchestration_template = template
-  orchestration_service.orchestration_manager  = orchestration_manager
-  orchestration_service.stack_options          = {:attributes => {}}
-  orchestration_service.display                = true
-  orchestration_service.parent_service         = parent_service
-  orchestration_service.deploy_orchestration_stack 
+  body = JSON.parse(RestClient::Request.execute(options))
+
+  orchestration_service = $evm.vmdb('service', body["results"].first["id"])
+  orchestration_service.deploy_orchestration_stack
   
   orchestration_service
 end  
