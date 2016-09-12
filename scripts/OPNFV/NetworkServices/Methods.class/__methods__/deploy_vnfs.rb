@@ -116,7 +116,7 @@ def get_template(orchestration_manager, network_service, parent_service, vnf_ser
               :ems_id       => orchestration_manager.id,
               :content      => YAML.dump(template_content)}
 
-  url     = "#{$evm.root['miq_server'].ipaddress}/api/orchestration_templates"
+  url     = "http://localhost:3000/api/orchestration_templates"
   options = {:method     => :post,
              :url        => url,
              :verify_ssl => false,
