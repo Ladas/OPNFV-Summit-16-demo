@@ -123,7 +123,7 @@ def deploy_networks_stack(orchestration_manager, parent_service, template)
                              "resource" => resource}.to_json,
              :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
                              :accept        => :json}}
-  $evm.log("info", "Creating CFN service #{options}")
+  $evm.log("info", "Creating HOT service #{options}")
 
   body = JSON.parse(RestClient::Request.execute(options))
 
