@@ -31,7 +31,14 @@ def retire_vnfs(network_service)
           
           $evm.log(:info, "Deleting #{vnf_service.name} VNFD orchestration template")
           temp_vnfd = $evm.vmdb('orchestration_template_vnfd')
-          temp_vnfd.destroy(template.id)
+
+          url     = "http://localhost:3000/api/orchestration_templates/#{temp_vnfd.id}"
+          options = {:method     => :delete,
+                     :url        => url,
+                     :verify_ssl => false,
+                     :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                                     :accept        => :json}}
+          RestClient::Request.execute(options)
         end
         
         # ...but also could be an AWS (CFN) stack
@@ -55,7 +62,13 @@ def retire_vnfs(network_service)
 
             if template != nil
               $evm.log(:info, "Deleting #{vnf_service.name} CFN orchestration template")
-              $evm.vmdb('orchestration_template_cfn').destroy(template.id)
+              url     = "http://localhost:3000/api/orchestration_templates/#{template.id}"
+              options = {:method     => :delete,
+                         :url        => url,
+                         :verify_ssl => false,
+                         :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                                         :accept        => :json}}
+              RestClient::Request.execute(options)
             end
           end
         end
@@ -66,7 +79,13 @@ def retire_vnfs(network_service)
       
       if template != nil
         $evm.log(:info, "Deleting #{vnf_service.name} networks HOT orchestration template")
-        $evm.vmdb('orchestration_template_hot').destroy(template.id)
+        url     = "http://localhost:3000/api/orchestration_templates/#{template.id}"
+        options = {:method     => :delete,
+                   :url        => url,
+                   :verify_ssl => false,
+                   :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                                   :accept        => :json}}
+        RestClient::Request.execute(options)
       end
     end
   end  
