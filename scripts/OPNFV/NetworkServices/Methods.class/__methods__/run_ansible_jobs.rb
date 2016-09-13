@@ -4,15 +4,7 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
   else
     job_name = "#{Time.now.utc} #{template.name}"
   end  
-  
-  orchestration_service = $evm.vmdb('ServiceAnsibleTower').create(
-    :name => job_name)
-  
-  # Store the ansible service ids, so we can wait for them in next step
-  ansible_service_ids = $evm.get_state_var(:ansible_service_ids)
-  ansible_service_ids << orchestration_service.id
-  $evm.set_state_var(:ansible_service_ids, ansible_service_ids)
-  
+
   $evm.log(:info, "Running Ansible Tower template on VM of the type: #{vms.first.type}")
   if vms.first.type == "ManageIQ::Providers::Amazon::CloudManager::Vm"
     # TODO figure out, how to pass elastic ip as part of VM inventory, this will work only
@@ -22,16 +14,37 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
     vm_names = vms.collect(&:name).join(",")
   end
   $evm.log(:info, "Running Ansible Tower template: #{template.name} on VMs: #{vm_names} with properties: #{properties}")
-  
+
+  resource = {:name                  => job_name,
+              :type                  => "ServiceAnsibleTower",
+              :job_template          => {:id => template.id},
+              :configuration_manager => {:id => configuration_manager.id},
+              :parent_service        => {:id => parent_service.id},
+              :job_options           => {:limit => vm_names, :extra_vars => properties},
+              :display               => true}
+
+  url     = "http://localhost:3000/api/services"
+  options = {:method     => :post,
+             :url        => url,
+             :verify_ssl => false,
+             :payload    => {"action"   => "create",
+                             "resource" => resource}.to_json,
+             :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                             :accept        => :json}}
+  $evm.log("info", "Creating Ansible Tower service #{options}")
+
+  body = JSON.parse(RestClient::Request.execute(options))
+
+  orchestration_service = $evm.vmdb('service', body["results"].first["id"])
+  orchestration_service.launch_job
+
   orchestration_service.custom_set(:extra_vars, JSON.pretty_generate(properties))
   orchestration_service.custom_set(:limit, vm_names)
-  
-  orchestration_service.job_template          = template
-  orchestration_service.configuration_manager = configuration_manager
-  orchestration_service.job_options           = {:limit => vm_names, :extra_vars => properties}
-  orchestration_service.display               = true
-  orchestration_service.parent_service        = parent_service
-  orchestration_service.launch_job 
+
+  # Store the ansible service ids, so we can wait for them in next step
+  ansible_service_ids = $evm.get_state_var(:ansible_service_ids)
+  ansible_service_ids << orchestration_service.id
+  $evm.set_state_var(:ansible_service_ids, ansible_service_ids)
 end
 
 def cps_for_id(network_service, id)
@@ -84,8 +97,10 @@ def get_cluster_info(parent_service, network_service)
   return cluster, subnets
 end  
 
-require 'ipaddr'
 begin
+  require 'ipaddr'
+  require 'rest-client'
+
   nsd = $evm.get_state_var(:nsd)
   $evm.set_state_var(:ansible_service_ids, [])
   
