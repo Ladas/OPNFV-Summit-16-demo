@@ -20,7 +20,7 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
               :job_template          => {:id => template.id},
               :configuration_manager => {:id => configuration_manager.id},
               :parent_service        => {:id => parent_service.id},
-              :job_options           => {:limit => vm_names, :extra_vars => properties},
+              :job_options           => {:limit => vm_names, :extra_vars => properties}.to_json,
               :display               => true}
 
   url     = "http://localhost:3000/api/services"
