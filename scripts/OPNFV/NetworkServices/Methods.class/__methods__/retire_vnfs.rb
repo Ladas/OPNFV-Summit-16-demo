@@ -11,7 +11,7 @@ def retire_vnfs(network_service)
       if stack
         # Tacker stack
         if vnf_service.orchestration_stack_status[0] == 'create_complete'
-          stack.raw_delete_stack()
+          delete_stack(stack)
           $evm.log(:info, "Retiring #{vnf_service.name}")
           vnf_service.retire_now()
           found_stack = true
@@ -47,7 +47,7 @@ def retire_vnfs(network_service)
         
         if stack != nil
           if vnf_service.orchestration_stack_status[0] == 'create_complete'
-            stack.raw_delete_stack()
+            delete_stack(stack)
             $evm.log(:info, "Retiring #{vnf_service.name}")
             vnf_service.retire_now()
             found_stack = true
@@ -94,6 +94,15 @@ def retire_vnfs(network_service)
     $evm.root['ae_result']         = 'retry'
     $evm.root['ae_retry_interval'] = '30.seconds'
     exit MIQ_OK
+  end
+end
+
+def delete_stack(stack)
+  begin
+    $evm.log(:info, "Deleting stack #{stack}")
+    stack.delete_stack()
+  rescue NotImplementedError => e
+    $evm.log(:info, "Stack #{stack} does not have a raw_delete_stack action")
   end
 end
 
