@@ -98,6 +98,8 @@ def retire_vnfs(network_service)
 end
 
 begin
+  require 'rest-client'
+
   nsd = $evm.get_state_var(:nsd)
   network_service = nil
   $evm.log("info", "Listing nsd #{nsd}")
