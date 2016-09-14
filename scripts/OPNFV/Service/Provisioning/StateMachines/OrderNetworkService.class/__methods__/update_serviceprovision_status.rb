@@ -14,7 +14,6 @@ status = $evm.inputs['status']
 
 # Update Status Message
 updated_message  = "[#{$evm.root['miq_server'].name}] "
-updated_message += "VM [#{prov.get_option(:vm_target_name)}] "
 updated_message += "Step [#{$evm.root['ae_state']}] "
 updated_message += "Status [#{status}] "
 updated_message += "Message [#{prov.message}] "
