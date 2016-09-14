@@ -100,7 +100,7 @@ end
 def delete_stack(stack)
   begin
     $evm.log(:info, "Deleting stack #{stack}")
-    stack.delete_stack()
+    stack.raw_delete_stack()
   rescue NotImplementedError => e
     $evm.log(:info, "Stack #{stack} does not have a raw_delete_stack action")
   end
