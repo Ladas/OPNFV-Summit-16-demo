@@ -11,9 +11,8 @@ def retire_vnfs(network_service)
       if stack
         # Tacker stack
         if vnf_service.orchestration_stack_status[0] == 'create_complete'
+          $evm.log(:info, "Deleting VNF stack#{vnf_service.name}")
           delete_stack(stack)
-          $evm.log(:info, "Retiring #{vnf_service.name}")
-          vnf_service.retire_now()
           found_stack = true
         elsif vnf_service.orchestration_stack_status[0] == 'transient'
           found_stack = true
@@ -59,7 +58,7 @@ def retire_vnfs(network_service)
           if vnf_service.respond_to?(:orchestration_stack_status) && (vnf_service.orchestration_stack_status[0] == 'create_complete' or vnf_service.orchestration_stack_status[0] == 'transient')
             found_stack = true
           else
-            $evm.log(:info, "Finding '#{vnf_service.name} #{type} #{network_service.id}' CFN orchestration template for deletion")
+            $evm.log(:info, "Finding '#{vnf_service.name} #{network_service.id}' CFN orchestration template for deletion")
             template = $evm.vmdb('orchestration_template_cfn').find_by_name("#{vnf_service.name} #{network_service.id}")
 
             if template != nil
