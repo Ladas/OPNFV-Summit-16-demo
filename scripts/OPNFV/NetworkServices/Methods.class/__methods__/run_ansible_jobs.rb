@@ -15,12 +15,12 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
   end
   $evm.log(:info, "Running Ansible Tower template: #{template.name} on VMs: #{vm_names} with properties: #{properties}")
 
-  resource = {:name                  => job_name,
-              :type                  => "ServiceAnsibleTower",
-              :job_template          => {:id => template.id},
-              :parent_service        => {:id => parent_service.id},
-              :job_options           => {:limit => vm_names, :extra_vars => properties}.to_yaml,
-              :display               => true}
+  resource = {:name           => job_name,
+              :type           => "ServiceAnsibleTower",
+              :job_template   => {:id => template.id},
+              :parent_service => {:id => parent_service.id},
+              :job_options    => {:limit => vm_names, :extra_vars => properties},
+              :display        => true}
 
   url     = "http://localhost:3000/api/services"
   options = {:method     => :post,
@@ -29,6 +29,7 @@ def launch_ansible_job(configuration_manager, network_service, parent_service, t
              :payload    => {"action"   => "create",
                              "resource" => resource}.to_json,
              :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                             :content_type  => :json,
                              :accept        => :json}}
   $evm.log("info", "Creating Ansible Tower service #{options}")
 
