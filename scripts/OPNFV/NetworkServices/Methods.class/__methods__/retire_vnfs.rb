@@ -18,7 +18,8 @@ def retire_vnfs(network_service)
           found_stack = true
         end
       else
-        # Could be a Tacker template remaining...    
+        # Could be a Tacker template remaining...
+        $evm.log(:info, "Properties '#{vnf_service.custom_get('properties')}' VNFD orchestration template for deletion")
         type = JSON.parse(vnf_service.custom_get('properties') || '{}').try(:[], 'type') || ""
         $evm.log(:info, "Finding '#{vnf_service.name} #{type} #{network_service.id}' VNFD orchestration template for deletion")
         template = $evm.vmdb('orchestration_template_vnfd').find_by_name("#{vnf_service.name} #{type} #{network_service.id}")
