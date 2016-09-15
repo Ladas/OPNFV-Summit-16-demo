@@ -29,10 +29,9 @@ def retire_vnfs(network_service)
             next
           end
           
-          $evm.log(:info, "Deleting #{vnf_service.name} VNFD orchestration template")
-          temp_vnfd = $evm.vmdb('orchestration_template_vnfd')
+          $evm.log(:info, "Deleting #{vnf_service.name} VNFD #{template.id} orchestration template")
 
-          url     = "http://localhost:3000/api/orchestration_templates/#{temp_vnfd.id}"
+          url     = "http://localhost:3000/api/orchestration_templates/#{template.id}"
           options = {:method     => :delete,
                      :url        => url,
                      :verify_ssl => false,
