@@ -7,15 +7,14 @@ def retire_vnfs(network_service)
       # This a VNF service
       
       stack = $evm.vmdb('ManageIQ_Providers_Openstack_CloudManager_Vnf').find_by_name("#{vnf_service.name} #{network_service.id}")
-      
-      if stack
+      status, reason = vnf_service.orchestration_stack.normalized_live_status
+
+      if stack && status != 'not_exist'
         # Tacker stack
-        if vnf_service.orchestration_stack_status[0] == 'create_complete'
+        found_stack = true
+        if vnf_service.orchestration_stack_status[0] == 'create_complete' || vnf_service.orchestration_stack_status[0] == 'update_complete'
           $evm.log(:info, "Deleting VNF stack#{vnf_service.name}")
           delete_stack(stack)
-          found_stack = true
-        elsif vnf_service.orchestration_stack_status[0] == 'transient'
-          found_stack = true
         end
       else
         # Could be a Tacker template remaining...
