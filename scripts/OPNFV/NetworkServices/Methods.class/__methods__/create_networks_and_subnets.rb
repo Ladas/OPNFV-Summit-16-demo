@@ -134,10 +134,10 @@ def deploy_networks_stack(orchestration_manager, parent_service, template)
 end
 
 def dialog_value(key)
-  bundle_dialog = YAML.load($evm.root['service_template_provision_task'].get_option(:parsed_dialog_options) || "{}")
-  $evm.log("info", "Listing bundle_dialog_options #{bundle_dialog}")
+  dialog_options = $evm.root['service_template_provision_task'].destination.dialog_options
+  $evm.log("info", "Listing bundle_dialog_options of #{$evm.root['service_template_provision_task'].inspect}: #{dialog_options}")
 
-  $evm.root.attributes[key] || bundle_dialog[:dialog].try(:[], key)
+  dialog_options[key]
 end
 
 begin
