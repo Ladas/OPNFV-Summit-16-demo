@@ -131,7 +131,14 @@ def deploy_networks_stack(orchestration_manager, parent_service, template)
   orchestration_service.deploy_orchestration_stack
   
   orchestration_service
-end  
+end
+
+def dialog_value(key)
+  bundle_dialog = YAML.load($evm.root['service_template_provision_task'].get_option(:parsed_dialog_options) || "{}")
+  $evm.log("info", "Listing bundle_dialog_options #{bundle_dialog}")
+
+  $evm.root.attributes[key] || bundle_dialog[:dialog].try(:[], key)
+end
 
 begin
   require 'rest-client'
@@ -142,15 +149,8 @@ begin
   $evm.root.attributes.sort.each { |k, v| $evm.log("info", "\t#{k}: #{v}") }
   $evm.log("info", "===========================================")
 
-  $evm.log("info", "Listing task options #{$evm.root['service_template_provision_task'].destination.options}")
-  options = YAML.load($evm.root['service_template_provision_task'].get_option(:parsed_dialog_options) || "{}")
-  $evm.root.attributes.merge!(options)
-
-  $evm.log("info", "Listing Changed Root Object Attributes:")
-  $evm.root.attributes.sort.each { |k, v| $evm.log("info", "\t#{k}: #{v}") }
-
   parent_service = $evm.root['service_template_provision_task'].destination
-  parent_service.name = $evm.root.attributes['dialog_service_name']
+  parent_service.name = dialog_value('dialog_service_name')
   
   network_service = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
   

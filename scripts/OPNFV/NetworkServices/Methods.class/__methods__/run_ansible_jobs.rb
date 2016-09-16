@@ -1,6 +1,6 @@
 def launch_ansible_job(configuration_manager, network_service, parent_service, template, vms, properties)
-  if !$evm.root.attributes['dialog_ansible_job_label'].blank?
-    job_name = "#{Time.now.utc} #{$evm.root.attributes['dialog_ansible_job_label']} (#{template.name})"
+  if !dialog_value('dialog_ansible_job_label').blank?
+    job_name = "#{Time.now.utc} #{dialog_value('dialog_ansible_job_label')} (#{template.name})"
   else
     job_name = "#{Time.now.utc} #{template.name}"
   end  
@@ -95,7 +95,14 @@ def get_cluster_info(parent_service, network_service)
   end
   
   return cluster, subnets
-end  
+end
+
+def dialog_value(key)
+  bundle_dialog = YAML.load($evm.root['service_template_provision_task'].get_option(:parsed_dialog_options) || "{}")
+  $evm.log("info", "Listing bundle_dialog_options #{bundle_dialog}")
+
+  $evm.root.attributes[key] || bundle_dialog[:dialog].try(:[], key)
+end
 
 begin
   require 'ipaddr'
@@ -110,21 +117,21 @@ begin
   $evm.log("info", "===========================================")
   network_service = nil
   
-  if !$evm.root.attributes['dialog_ordered_network_service'].blank?
-    parent_service = $evm.vmdb(:service, $evm.root.attributes['dialog_ordered_network_service'])
+  if !dialog_value('dialog_ordered_network_service').blank?
+    parent_service = $evm.vmdb(:service, dialog_value('dialog_ordered_network_service'))
     network_service = $evm.vmdb(:service, parent_service.get_dialog_option('dialog_network_service'))
     
     ansible_job_reconfiguration_service = $evm.root['service_template_provision_task'].destination
-    ansible_job_reconfiguration_service.name = $evm.root.attributes['dialog_ansible_job_label']
+    ansible_job_reconfiguration_service.name = dialog_value('dialog_ansible_job_label')
     ansible_job_reconfiguration_service.display = false
     ansible_job_reconfiguration_service.parent_service = parent_service
    
     raise "Can't find network service with id #{parent_service.get_dialog_option('dialog_network_service')}" if network_service.nil?
   else
     parent_service = $evm.root['service_template_provision_task'].destination
-    parent_service.name = $evm.root.attributes['dialog_service_name']
+    parent_service.name = dialog_value('dialog_service_name')
   
-    network_service = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
+    network_service = $evm.vmdb('service', dialog_value('dialog_network_service'))
   end
   
   cluster, subnets = get_cluster_info(parent_service, network_service)
@@ -137,14 +144,14 @@ begin
     properties['cluster'] = cluster
     properties['subnets'] = subnets
     
-    if !$evm.root.attributes['dialog_extra_variables'].blank?
-      extra_variables = JSON.parse($evm.root.attributes['dialog_extra_variables'])
+    if !dialog_value('dialog_extra_variables').blank?
+      extra_variables = JSON.parse(dialog_value('dialog_extra_variables'))
       properties.merge!(extra_variables)
     end  
     
     ansible_manager_name = properties['ansible_vim_id']
-    if $evm.root.attributes['dialog_ansible_template_name']
-      template_name = $evm.root.attributes['dialog_ansible_template_name']
+    if dialog_value('dialog_ansible_template_name')
+      template_name = dialog_value('dialog_ansible_template_name')
     else
       template_name = properties['ansible_template_name']
     end  
@@ -160,8 +167,8 @@ begin
     $evm.log("info", "Found template #{template.name}")
 
     skip_vnf = false
-    if !$evm.root.attributes['dialog_limited_to_vnf'].blank? && $evm.root.attributes['dialog_limited_to_vnf'] != "!"
-      skip_vnf = $evm.root.attributes['dialog_limited_to_vnf'].to_s != vnf_service.id.to_s
+    if !dialog_value('dialog_limited_to_vnf').blank? && dialog_value('dialog_limited_to_vnf') != "!"
+      skip_vnf = dialog_value('dialog_limited_to_vnf').to_s != vnf_service.id.to_s
       $evm.log("info", "Skipping ansible job on #{vnf_service.name}") if skip_vnf
     end
     launch_ansible_job(configuration_manager, network_service, vnf_service, template, vnf_service.vms, properties) unless skip_vnf

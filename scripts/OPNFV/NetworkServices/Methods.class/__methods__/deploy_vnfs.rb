@@ -174,7 +174,14 @@ def deploy_vnf_stack(orchestration_manager, network_service, parent_service, vnf
   orchestration_service = $evm.vmdb('service', body["results"].first["id"])
   orchestration_service.custom_set('properties', params)
   orchestration_service.deploy_orchestration_stack 
-end  
+end
+
+def dialog_value(key)
+  bundle_dialog = YAML.load($evm.root['service_template_provision_task'].get_option(:parsed_dialog_options) || "{}")
+  $evm.log("info", "Listing bundle_dialog_options #{bundle_dialog}")
+
+  $evm.root.attributes[key] || bundle_dialog[:dialog].try(:[], key)
+end
 
 begin
   require 'rest-client'
@@ -186,9 +193,9 @@ begin
   $evm.log("info", "===========================================")
   
   parent_service = $evm.root['service_template_provision_task'].destination
-  parent_service.name = $evm.root.attributes['dialog_service_name']
+  parent_service.name = dialog_value('dialog_service_name')
   
-  network_service = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
+  network_service = $evm.vmdb('service', dialog_value('dialog_network_service'))
   
   deploy_vnfs(network_service, parent_service)
 rescue => err
