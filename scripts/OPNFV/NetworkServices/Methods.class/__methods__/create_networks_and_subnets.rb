@@ -141,7 +141,14 @@ begin
   $evm.log("info", "Listing Root Object Attributes:")
   $evm.root.attributes.sort.each { |k, v| $evm.log("info", "\t#{k}: #{v}") }
   $evm.log("info", "===========================================")
-  
+
+  $evm.log("info", "Listing task options #{$evm.root['service_template_provision_task'].destination.options}")
+  options = $evm.root['service_template_provision_task'].destination.options || {}
+  $evm.root.attributes.merge!(options)
+
+  $evm.log("info", "Listing Changed Root Object Attributes:")
+  $evm.root.attributes.sort.each { |k, v| $evm.log("info", "\t#{k}: #{v}") }
+
   parent_service = $evm.root['service_template_provision_task'].destination
   parent_service.name = $evm.root.attributes['dialog_service_name']
   
