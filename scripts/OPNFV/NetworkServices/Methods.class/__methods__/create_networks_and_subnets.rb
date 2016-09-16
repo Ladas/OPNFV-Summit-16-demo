@@ -143,7 +143,7 @@ begin
   $evm.log("info", "===========================================")
 
   $evm.log("info", "Listing task options #{$evm.root['service_template_provision_task'].destination.options}")
-  options = $evm.root['service_template_provision_task'].destination.options || {}
+  options = YAML.load($evm.root['service_template_provision_task'].get_option(:parsed_dialog_options) || "{}")
   $evm.root.attributes.merge!(options)
 
   $evm.log("info", "Listing Changed Root Object Attributes:")
