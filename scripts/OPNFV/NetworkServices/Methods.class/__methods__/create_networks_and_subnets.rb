@@ -152,7 +152,7 @@ begin
   parent_service = $evm.root['service_template_provision_task'].destination
   parent_service.name = dialog_value('dialog_service_name')
   
-  network_service = $evm.vmdb('service', $evm.root.attributes['dialog_network_service'])
+  network_service = $evm.vmdb('service', dialog_value('dialog_network_service'))
   
   deploy_networks(network_service, parent_service)
 rescue => err
