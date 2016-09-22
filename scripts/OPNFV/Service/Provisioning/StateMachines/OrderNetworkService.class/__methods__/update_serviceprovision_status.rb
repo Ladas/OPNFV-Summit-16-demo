@@ -10,11 +10,14 @@ unless prov
   exit(MIQ_STOP)
 end
 
-# Get status from input field status
 status = $evm.inputs['status']
 
-# Update Status for on_entry,on_exit
-if $evm.root['ae_result'] != 'retry'
-  prov.message = status
-  prov.miq_request.user_message = status
-end
+# Update Status Message
+updated_message  = "[#{$evm.root['miq_server'].name}] "
+updated_message += "Step [#{$evm.root['ae_state']}] "
+updated_message += "Status [#{status}] "
+# TODO the message is missleading, figure out why, always says it's processed
+# updated_message += "Message [#{prov.message}] "
+updated_message += "Current Retry Number [#{$evm.root['ae_state_retries']}]"
+prov.miq_request.user_message = updated_message
+prov.message = status

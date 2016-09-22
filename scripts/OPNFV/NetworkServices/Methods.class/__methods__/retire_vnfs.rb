@@ -7,20 +7,20 @@ def retire_vnfs(network_service)
       # This a VNF service
       
       stack = $evm.vmdb('ManageIQ_Providers_Openstack_CloudManager_Vnf').find_by_name("#{vnf_service.name} #{network_service.id}")
-      
-      if stack
+      status, reason = vnf_service.orchestration_stack.normalized_live_status
+
+      if stack && status != 'not_exist'
         # Tacker stack
-        if vnf_service.orchestration_stack_status[0] == 'create_complete'
-          stack.raw_delete_stack()
-          $evm.log(:info, "Retiring #{vnf_service.name}")
-          vnf_service.retire_now()
-          found_stack = true
-        elsif vnf_service.orchestration_stack_status[0] == 'transient'
-          found_stack = true
+        found_stack = true
+        if vnf_service.orchestration_stack_status[0] == 'create_complete' || vnf_service.orchestration_stack_status[0] == 'update_complete'
+          $evm.log(:info, "Deleting VNF stack#{vnf_service.name}")
+          delete_stack(stack)
         end
       else
-        # Could be a Tacker template remaining...    
+        # Could be a Tacker template remaining...
+        $evm.log(:info, "Properties '#{vnf_service.custom_get('properties')}' VNFD orchestration template for deletion")
         type = JSON.parse(vnf_service.custom_get('properties') || '{}').try(:[], 'type') || ""
+        $evm.log(:info, "Finding '#{vnf_service.name} #{type} #{network_service.id}' VNFD orchestration template for deletion")
         template = $evm.vmdb('orchestration_template_vnfd').find_by_name("#{vnf_service.name} #{type} #{network_service.id}")
 
         if template
@@ -29,9 +29,15 @@ def retire_vnfs(network_service)
             next
           end
           
-          $evm.log(:info, "Deleting #{vnf_service.name} VNFD orchestration template")
-          temp_vnfd = $evm.vmdb('orchestration_template_vnfd')
-          temp_vnfd.destroy(template.id)
+          $evm.log(:info, "Deleting #{vnf_service.name} VNFD #{template.id} orchestration template")
+
+          url     = "http://localhost:3000/api/orchestration_templates/#{template.id}"
+          options = {:method     => :delete,
+                     :url        => url,
+                     :verify_ssl => false,
+                     :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                                     :accept        => :json}}
+          RestClient::Request.execute(options)
         end
         
         # ...but also could be an AWS (CFN) stack
@@ -40,7 +46,7 @@ def retire_vnfs(network_service)
         
         if stack != nil
           if vnf_service.orchestration_stack_status[0] == 'create_complete'
-            stack.raw_delete_stack()
+            delete_stack(stack)
             $evm.log(:info, "Retiring #{vnf_service.name}")
             vnf_service.retire_now()
             found_stack = true
@@ -51,11 +57,18 @@ def retire_vnfs(network_service)
           if vnf_service.respond_to?(:orchestration_stack_status) && (vnf_service.orchestration_stack_status[0] == 'create_complete' or vnf_service.orchestration_stack_status[0] == 'transient')
             found_stack = true
           else
+            $evm.log(:info, "Finding '#{vnf_service.name} #{network_service.id}' CFN orchestration template for deletion")
             template = $evm.vmdb('orchestration_template_cfn').find_by_name("#{vnf_service.name} #{network_service.id}")
 
             if template != nil
               $evm.log(:info, "Deleting #{vnf_service.name} CFN orchestration template")
-              $evm.vmdb('orchestration_template_cfn').destroy(template.id)
+              url     = "http://localhost:3000/api/orchestration_templates/#{template.id}"
+              options = {:method     => :delete,
+                         :url        => url,
+                         :verify_ssl => false,
+                         :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                                         :accept        => :json}}
+              RestClient::Request.execute(options)
             end
           end
         end
@@ -66,7 +79,13 @@ def retire_vnfs(network_service)
       
       if template != nil
         $evm.log(:info, "Deleting #{vnf_service.name} networks HOT orchestration template")
-        $evm.vmdb('orchestration_template_hot').destroy(template.id)
+        url     = "http://localhost:3000/api/orchestration_templates/#{template.id}"
+        options = {:method     => :delete,
+                   :url        => url,
+                   :verify_ssl => false,
+                   :headers    => {"X-Auth-Token" => MIQ_API_TOKEN,
+                                   :accept        => :json}}
+        RestClient::Request.execute(options)
       end
     end
   end  
@@ -78,7 +97,18 @@ def retire_vnfs(network_service)
   end
 end
 
+def delete_stack(stack)
+  begin
+    $evm.log(:info, "Deleting stack #{stack}")
+    stack.raw_delete_stack()
+  rescue NotImplementedError => e
+    $evm.log(:info, "Stack #{stack} does not have a raw_delete_stack action")
+  end
+end
+
 begin
+  require 'rest-client'
+
   nsd = $evm.get_state_var(:nsd)
   network_service = nil
   $evm.log("info", "Listing nsd #{nsd}")
